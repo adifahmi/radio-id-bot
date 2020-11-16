@@ -95,12 +95,14 @@ async def _play(ctx, station, channel: discord.VoiceChannel=None):
                     await ctx.send(f"Moved to: **{channel}**")
             else:
                 await channel.connect()
+                vc = ctx.voice_client
                 await ctx.send(f"Connected to: **{channel}**")
         except asyncio.TimeoutError:
             await ctx.send(f"Connecting to channel: <{channel}> timed out.")
             return
 
         await ctx.send(f"Start playing {station} ...")
+        time.sleep(1)
         vc.play(discord.FFmpegPCMAudio(source), after=lambda e: print("Media play stopped/done"))
     except Exception as e:
         await ctx.send(f"A client exception occured:\n`{e}`")
