@@ -1,6 +1,7 @@
 RADIO_LIST = {
-    "hardrock-jakarta": "https://ample-08.radiojar.com/7csmg90fuqruv.mp3?1605508526=&rj-tok=AAABdc_NLSsAXMLmziO7tWWweQ&rj-ttl=5",
-    "prambors-jakarta": "https://masima.rastream.com/masima-pramborsjakarta"
+    "hardrock-jakarta": "https://ample-08.radiojar.com/7csmg90fuqruv.mp3",
+    "prambors-jakarta": "https://masima.rastream.com/masima-pramborsjakarta",
+    "trax-jakarta": "https://stream.radiojar.com/rrqf78p3bnzuv"
 }
 
 def get_radio_stream(radio):
