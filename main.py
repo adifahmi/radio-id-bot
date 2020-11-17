@@ -1,7 +1,6 @@
-import os
 import asyncio
-import time
 import discord
+import os
 
 from dotenv import load_dotenv
 from discord.ext import commands
@@ -9,12 +8,14 @@ from discord.ext import commands
 from static import get_radio_stream, get_radio_list
 
 load_dotenv()
+
 TOKEN = os.getenv("DISCORD_TOKEN")
 if TOKEN is None:
-    print("Please state your discord bot token in .env")
+    print("CONFIG ERROR: Please state your discord bot token in .env")
     exit()
 
 bot = commands.Bot(command_prefix="!radio ", description="A bot to play Indonesian radio station")
+
 
 @bot.event
 async def on_ready():
@@ -24,7 +25,7 @@ async def on_ready():
 
 @commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
 @bot.command(name="join")
-async def _join(ctx, *, channel: discord.VoiceChannel=None):
+async def _join(ctx, *, channel: discord.VoiceChannel = None):
     """
     Connect this bot to a voice channel
 
@@ -115,9 +116,25 @@ async def _play(ctx, station):
             return
 
         await ctx.send(f"Start playing {station} :loud_sound:")
-        time.sleep(1)
+        await asyncio.sleep(1)
         vc.play(discord.FFmpegPCMAudio(source), after=lambda e: print("Media play stop"))
-        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=station))
+        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="your favorit station!"))
+
+        # Handle lonely bot
+        # if bot is alone in voice channel, it will stop the radio and leave
+        while True:
+            await asyncio.sleep(10)
+            if vc.is_playing():
+                await asyncio.sleep(5)
+                if len(channel.voice_states) < 2:
+                    await ctx.send(f"No one on **{channel}**, radio will leave in 3s")
+                    await asyncio.sleep(3)
+                    await vc.disconnect()
+                    await bot.change_presence(activity=None, status=discord.Status.online)
+                    break
+            else:
+                break
+
     except Exception as e:
         await ctx.send(f"A client exception occured:\n`{e}`")
 
@@ -136,8 +153,7 @@ async def _playing(ctx):
     if vc.is_playing() is False:
         await ctx.send("Radio not playing anything")
         return
-    
-    print(vc.source)
+
     await ctx.send(f"Radio is playing {vc.source}")
 
 
@@ -152,21 +168,21 @@ async def _stop(ctx):
     if not vc:
         await ctx.send("Radio not in a voice channel")
         return
-    
+
     if vc.is_playing() is False:
         await ctx.send("Radio not playing anything")
         return
 
     await ctx.send("Stopping...")
     vc.stop()
-    time.sleep(3)
+    await asyncio.sleep(3)
     await bot.change_presence(activity=None, status=discord.Status.online)
     await ctx.send("Radio stopped")
 
 
 @commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
 @bot.command("leave")
-async def _disconnect(ctx):
+async def _leave(ctx):
     """
     Disconnect from a voice channel, if in one
     """
@@ -177,7 +193,7 @@ async def _disconnect(ctx):
         return
 
     await vc.disconnect()
-    time.sleep(2)
+    await asyncio.sleep(2)
     await bot.change_presence(activity=None, status=discord.Status.online)
     await ctx.send("Radio have left the voice channel")
 
@@ -192,7 +208,7 @@ async def _ping(ctx):
     if not vc:
         await ctx.send("Radio not in a voice channel")
         return
-    
+
     latency = vc.latency
     await ctx.send(f"Radio bot voice latency is {latency} seconds")
 
@@ -215,13 +231,28 @@ async def info_error(ctx, error):
         except AttributeError:
             await ctx.send("You need to be in voice channel")
             return
-        await ctx.send(f"Please specify radio station, use `!radio list` to get list of available station")
+        await ctx.send("Please specify radio station, use `!radio list` to get list of available station")
+
 
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
-        await ctx.send("This command is on a %.2fs cooldown" % error.retry_after)
+        cd = "{:.2f}".format(error.retry_after)
+        await ctx.send(f"This command is on a {cd}s cooldown")
+        return
+
+    if isinstance(error, commands.CommandNotFound):
+        await ctx.send(f"{str(error)}, use `!radio help` to list available commands")
+        return
+
+    if isinstance(error, commands.ChannelNotFound):
+        await ctx.send(str(error))
+        return
+
+    if isinstance(error, commands.CommandInvokeError):
+        await ctx.send(str(error))
         return
     raise error
+
 
 bot.run(TOKEN)
