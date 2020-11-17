@@ -16,8 +16,8 @@ List all available commands
 * `!radioid ping`
 Check bot discord latency
 
-* `!radioid join`
-Join a voice channel
+* `!radioid join <channel-name>`
+Join to desired channel, if empty default to Author voice channel
 
 * `!radioid list `
 List all available radio stations
