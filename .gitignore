@@ -76,3 +76,4 @@ venv*
 .idea/*
 
 .env
+stations.yaml
