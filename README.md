@@ -43,14 +43,18 @@ About this bot
 * Python 3.5+
 * [FFMPEG](https://ffmpeg.org/download.html)
 
-Example on Ubuntu:
+## Example how to run
+* on Ubuntu:
 
     sudo apt install ffmpeg
     virtualenv -p python3.6 venv
     . venv/bin/activate
     pip install -r requirements.txt
 
-don't forget to create .env file with your discord bot token then run the python
+* Create .env file and put your discord bot token on it
+* Create stations.yaml file (follow the example) and store your radio stations list there
+
+* Run the python
 
     python main.py
     
