@@ -31,6 +31,9 @@ Stop the radio
 * `!radioid leave`
 Leave voice channel
 
+* `!radioid about`
+About this bot
+
 ## References
 * https://discordpy.readthedocs.io/en/latest/
 * https://stackoverflow.com/a/62495928/4844294
