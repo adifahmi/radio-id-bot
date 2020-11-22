@@ -2,19 +2,23 @@ import asyncio
 import discord
 import os
 
-from dotenv import load_dotenv
 from discord.ext import commands
-
+from dotenv import load_dotenv
 from static import get_radio_stream, get_radio_list
 
 load_dotenv()
 
-TOKEN = os.getenv("DISCORD_TOKEN")
+PREFIX = "!radio "
+TOKEN = os.getenv("DISCORD_TOKEN_DEV")
+if os.environ.get("ENVIRONMENT") == "dev":
+    PREFIX = "!r "
+    TOKEN = os.getenv("DISCORD_TOKEN_DEV")
+
 if TOKEN is None:
     print("CONFIG ERROR: Please state your discord bot token in .env")
     exit()
 
-bot = commands.Bot(command_prefix="!radio ", description="A bot to play Indonesian radio station")
+bot = commands.Bot(command_prefix=PREFIX, description="A bot to play Indonesian radio station")
 
 
 @bot.event

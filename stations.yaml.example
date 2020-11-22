@@ -1,3 +1,4 @@
 ---
 radio-stations:
   name-of-stations: http-url-to-stream
+  another-stations: http-url-to-stream
