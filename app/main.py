@@ -9,7 +9,7 @@ from static import get_radio_stream, get_radio_list
 load_dotenv()
 
 PREFIX = "!radio "
-TOKEN = os.getenv("DISCORD_TOKEN_DEV")
+TOKEN = os.getenv("DISCORD_TOKEN")
 if os.environ.get("ENVIRONMENT") == "dev":
     PREFIX = "!r "
     TOKEN = os.getenv("DISCORD_TOKEN_DEV")
