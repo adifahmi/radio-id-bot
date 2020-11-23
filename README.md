@@ -55,7 +55,7 @@ Create `.env` file and put your discord bot token on it\
 Create `stations.yaml` file (follow the example) and store your radio stations list there\
 Run the python
 
-    python main.py
+    python app/main.py
     
 ## About
 
