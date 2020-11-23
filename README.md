@@ -10,28 +10,28 @@ Invite this bot to your server with this [link 🔗](https://discord.com/api/oau
 
 Note: The default prefix is `!radio`
 
-* `!radioid help`
+* `!radio help`
 List all available commands
 
-* `!radioid ping`
+* `!radio ping`
 Check bot discord latency
 
-* `!radioid join <channel-name>`
+* `!radio join <channel-name>`
 Join to desired channel, if empty default to Author voice channel
 
-* `!radioid list `
+* `!radio list `
 List all available radio stations
 
-* `!radioid play <radio-station>`
+* `!radio play <radio-station>`
 Join/move to author voice channel and start playing the radio
 
-* `!radioid stop`
+* `!radio stop`
 Stop the radio
 
-* `!radioid leave`
+* `!radio leave`
 Leave voice channel
 
-* `!radioid about`
+* `!radio about`
 About this bot
 
 ## References
