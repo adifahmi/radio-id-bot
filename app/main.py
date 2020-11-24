@@ -78,7 +78,7 @@ async def _list(ctx):
     return
 
 
-@commands.cooldown(rate=1, per=10, type=commands.BucketType.guild)
+@commands.cooldown(rate=1, per=5, type=commands.BucketType.guild)
 @bot.command(name="play")
 async def _play(ctx, station):
     """
@@ -101,7 +101,6 @@ async def _play(ctx, station):
         print(f"Initiate radio play on {ctx.guild.name} - {channel}, station: {station}")
 
         vc = ctx.voice_client
-
         try:
             # check if already connected to vc/no
             if vc:
@@ -119,9 +118,28 @@ async def _play(ctx, station):
             await ctx.send(f"Connecting to channel: <{channel}> timed out")
             return
 
-        await ctx.send(f"Start playing {station} :loud_sound:")
+        await ctx.send(f"Start playing **{station}** :loud_sound:")
         await asyncio.sleep(1)
-        vc.play(discord.FFmpegPCMAudio(source), after=lambda e: print("Media play stop"))
+
+        # this function is called after the audio source has been exhausted or an error occurred
+        def _vc_end(error):
+            stop_msg = "Radio stopped :mute:"
+            if error:
+                stop_msg += f" because of {error}"
+            coroutine = ctx.send(stop_msg)
+            fut = asyncio.run_coroutine_threadsafe(coroutine, bot.loop)
+            try:
+                fut.result()
+            except Exception as err:
+                print(f"Error sending vc end message: {str(err)}")
+            return
+
+        try:
+            vc.play(discord.FFmpegPCMAudio(source), after=_vc_end)
+        except Exception as e:
+            print(f"Error playing {station} | {e}")
+            await ctx.send(f"Error when trying to play {station}")
+
         await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="your favorit station!"))
 
         # Handle lonely bot
@@ -181,7 +199,6 @@ async def _stop(ctx):
     vc.stop()
     await asyncio.sleep(3)
     await bot.change_presence(activity=None, status=discord.Status.online)
-    await ctx.send("Radio stopped")
 
 
 @commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
@@ -256,6 +273,11 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandInvokeError):
         await ctx.send(str(error))
         return
+
+    if isinstance(error, commands.MissingRequiredArgument):
+        return
+
+    await ctx.send(str(error))
     raise error
 
 
