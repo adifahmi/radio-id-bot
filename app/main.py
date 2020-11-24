@@ -56,6 +56,8 @@ async def _join(ctx, *, channel: discord.VoiceChannel = None):
             if vc.channel.id != channel.id:
                 await vc.move_to(channel)
                 await ctx.send(f"Moved to: **{channel}**")
+            else:
+                await ctx.send(f"Already joined **{channel}**")
         else:
             await channel.connect()
             await ctx.send(f"Connected to: **{channel}**")
