@@ -27,6 +27,27 @@ async def on_ready():
     print(f"Currently added by {len(bot.guilds)} servers")
 
 
+@commands.is_owner()
+@bot.command("stats")
+async def _stats(ctx):
+    """
+    Misc stats of the bot
+    """
+
+    await ctx.send(f"Added by {len(bot.guilds)} servers")
+
+    total_member = 0
+    guild_list_msg = "List of servers:\n"
+    for guild in bot.guilds:
+        guild_list_msg += f"• {guild.name} ({len(guild.members)} members)"
+        for member in guild.members:
+            total_member += 1
+
+    await ctx.send(f"{guild_list_msg}\n")
+    await ctx.send(f"Total members: {total_member}")
+    return
+
+
 @commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
 @bot.command(name="join")
 async def _join(ctx, *, channel: discord.VoiceChannel = None):
