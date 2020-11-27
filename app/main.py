@@ -25,6 +25,7 @@ bot = commands.Bot(command_prefix=PREFIX, description="A bot to play Indonesian 
 async def on_ready():
     print(f"{bot.user.name} has connected to Discord!")
     print(f"Currently added by {len(bot.guilds)} servers")
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=f"type `{PREFIX}help` to use this bot."))
 
 
 @commands.is_owner()
@@ -33,6 +34,7 @@ async def _stats(ctx):
     """
     Misc stats of the bot
     """
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=f"type `{PREFIX}help` to use this bot."))
 
     await ctx.send(f"Added by {len(bot.guilds)} servers")
 
@@ -163,7 +165,7 @@ async def _play(ctx, station):
             print(f"Error playing {station} | {e}")
             await ctx.send(f"Error when trying to play {station}")
 
-        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="your favorit station!"))
+        # await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="your favorit station!"))
 
         # Handle lonely bot
         # if bot is alone in voice channel, it will stop the radio and leave
@@ -175,7 +177,6 @@ async def _play(ctx, station):
                     await ctx.send(f"No one on **{channel}**, radio will leave in 3s")
                     await asyncio.sleep(3)
                     await vc.disconnect()
-                    await bot.change_presence(activity=None, status=discord.Status.online)
                     break
             else:
                 break
@@ -221,7 +222,6 @@ async def _stop(ctx):
     await ctx.send("Stopping...")
     vc.stop()
     await asyncio.sleep(3)
-    await bot.change_presence(activity=None, status=discord.Status.online)
 
 
 @commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
@@ -238,7 +238,6 @@ async def _leave(ctx):
 
     await vc.disconnect()
     await asyncio.sleep(2)
-    await bot.change_presence(activity=None, status=discord.Status.online)
     await ctx.send("Radio have left the voice channel")
 
 
