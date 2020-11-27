@@ -41,7 +41,7 @@ async def _stats(ctx):
     total_member = 0
     guild_list_msg = "List of servers:\n"
     for guild in bot.guilds:
-        guild_list_msg += f"• {guild.name} ({len(guild.members)} members)"
+        guild_list_msg += f"• {guild.name} ({guild.member_count} members)\n"
         for member in guild.members:
             total_member += 1
 
