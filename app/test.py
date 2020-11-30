@@ -5,6 +5,7 @@ from urllib.error import HTTPError, URLError
 
 from static import RADIO_STATIONS
 
+
 class TestStringMethods(unittest.TestCase):
 
     def test_stream_url(self):

@@ -29,12 +29,29 @@ async def on_ready():
 
 
 @commands.is_owner()
+@bot.command("presence")
+async def _change_presence(ctx, *status):
+    """
+    Change status of the bot
+    """
+
+    if not status:
+        status = f"type `{PREFIX}help` to use this bot."
+    else:
+        status = " ".join(status[:])
+
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=status))
+
+    await ctx.send(f"Status changed to:\n{status}")
+    return
+
+
+@commands.is_owner()
 @bot.command("stats")
 async def _stats(ctx):
     """
     Misc stats of the bot
     """
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=f"type `{PREFIX}help` to use this bot."))
 
     await ctx.send(f"Added by {len(bot.guilds)} servers")
 
