@@ -66,6 +66,27 @@ async def _stats(ctx):
     return
 
 
+async def join_or_move(ctx, channel):
+    vc = ctx.voice_client
+    try:
+        # check if already connected to vc/no
+        if vc:
+            if vc.is_playing() is True:
+                await ctx.send("Radio is playing a station, use `!radio stop` to stop current session.")
+                return
+            if vc.channel.id != channel.id:
+                await vc.move_to(channel)
+                await ctx.send(f"Moved to: **{channel}**")
+        else:
+            await channel.connect()
+            vc = ctx.voice_client
+            await ctx.send(f"Connected to: **{channel}**")
+    except asyncio.TimeoutError:
+        await ctx.send(f"Connecting to channel: <{channel}> timed out")
+        return
+    return vc
+
+
 @commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
 @bot.command(name="join")
 async def _join(ctx, *, channel: discord.VoiceChannel = None):
@@ -86,23 +107,8 @@ async def _join(ctx, *, channel: discord.VoiceChannel = None):
             await ctx.send("No channel to join. Please either specify a valid channel or join one.")
             return
 
-    vc = ctx.voice_client
-    try:
-        # check if already connected to vc/no
-        if vc:
-            # check if bot is not on same channel as author
-            # then move it
-            if vc.channel.id != channel.id:
-                await vc.move_to(channel)
-                await ctx.send(f"Moved to: **{channel}**")
-            else:
-                await ctx.send(f"Already joined **{channel}**")
-        else:
-            await channel.connect()
-            await ctx.send(f"Connected to: **{channel}**")
-    except asyncio.TimeoutError:
-        await ctx.send(f"Connecting to channel: <{channel}> timed out.")
-        return
+    await join_or_move(ctx, channel)
+    return
 
 
 @commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
@@ -141,22 +147,8 @@ async def _play(ctx, station):
 
         print(f"Initiate radio play on {ctx.guild.name} - {channel}, station: {station}")
 
-        vc = ctx.voice_client
-        try:
-            # check if already connected to vc/no
-            if vc:
-                if vc.is_playing() is True:
-                    await ctx.send("Radio is already playing a station, use `!radio stop` to stop current station and reinitiate `!radio play`")
-                    return
-                if vc.channel.id != channel.id:
-                    await vc.move_to(channel)
-                    await ctx.send(f"Moved to: **{channel}**")
-            else:
-                await channel.connect()
-                vc = ctx.voice_client
-                await ctx.send(f"Connected to: **{channel}**")
-        except asyncio.TimeoutError:
-            await ctx.send(f"Connecting to channel: <{channel}> timed out")
+        vc = await join_or_move(ctx, channel)
+        if vc is None:
             return
 
         await ctx.send(f"Start playing **{station}** :loud_sound:")
@@ -180,8 +172,6 @@ async def _play(ctx, station):
         except Exception as e:
             print(f"Error playing {station} | {e}")
             await ctx.send(f"Error when trying to play {station}")
-
-        # await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="your favorit station!"))
 
         # Handle lonely bot
         # if bot is alone in voice channel, it will stop the radio and leave
