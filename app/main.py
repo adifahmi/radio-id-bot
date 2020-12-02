@@ -18,7 +18,12 @@ if TOKEN is None:
     print("CONFIG ERROR: Please state your discord bot token in .env")
     exit()
 
-bot = commands.Bot(command_prefix=f"{PREFIX} ", description="A bot to play Indonesian radio station")
+
+help_command = commands.DefaultHelpCommand(
+    no_category='Commands'
+)
+
+bot = commands.Bot(command_prefix=f"{PREFIX} ", description="A bot to play Indonesian radio station", help_command=help_command)
 
 
 @bot.event
@@ -29,10 +34,10 @@ async def on_ready():
 
 
 @commands.is_owner()
-@bot.command("presence")
+@bot.command("presence", hidden=True)
 async def _change_presence(ctx, *status):
     """
-    Change status of the bot
+    Change status of this bot (owner only)
     """
 
     if not status:
@@ -47,10 +52,10 @@ async def _change_presence(ctx, *status):
 
 
 @commands.is_owner()
-@bot.command("stats")
+@bot.command("stats", hidden=True)
 async def _stats(ctx):
     """
-    Misc stats of the bot
+    Show some stats of this bot (owner only)
     """
 
     await ctx.send(f"Added by {len(bot.guilds)} servers")
@@ -117,7 +122,7 @@ async def _join(ctx, *, channel: discord.VoiceChannel = None):
 @bot.command("list")
 async def _list(ctx):
     """
-    List of available radio stations
+    Show list of available radio stations
     """
 
     message = "List of available stations:\n"
@@ -203,11 +208,11 @@ async def _playing(ctx):
     vc = ctx.voice_client
 
     if not vc:
-        await ctx.send("Radio not in a voice channel")
+        await ctx.send("Radio is not playing anything")
         return
 
     if vc.is_playing() is False:
-        await ctx.send("Radio not playing anything")
+        await ctx.send("Radio is not playing anything")
         return
 
     await ctx.send(f"Radio is playing {vc.source}")
@@ -218,7 +223,7 @@ async def _playing(ctx):
 @bot.command("stop")
 async def _stop(ctx):
     """
-    Stop current radio
+    Stop current radio play
     """
     vc = ctx.voice_client
 
@@ -253,8 +258,8 @@ async def _leave(ctx):
     await ctx.send("Radio have left the voice channel")
 
 
-@bot.command("ping")
 @commands.guild_only()
+@bot.command("ping", hidden=True)
 async def _ping(ctx):
     """
     Check latency between a HEARTBEAT and a HEARTBEAT_ACK in seconds
@@ -272,10 +277,24 @@ async def _ping(ctx):
 @bot.command("about")
 async def _about(ctx):
     """
-    Print contact info
+    About this bot
     """
-    embed = discord.Embed()
-    embed.description = "Created by [AF](https://twitter.com/adifahmii), source code is available on [Github](https://github.com/AdiFahmi/radio-id-bot)"
+
+    embed = discord.Embed(
+        title="Radio Indonesia",
+        url="https://github.com/AdiFahmi/radio-id-bot",
+        description="Radio-id-bot is a simple Discord Music Bot built with discord.py \
+            to play a radio from some Indonesian radio-station.\
+                 It's also open source on [Github](https://github.com/AdiFahmi/radio-id-bot)!",
+        color=0x9395a5
+    )
+    embed.set_author(
+        name="Adi Fahmi",
+        url="https://twitter.com/adifahmii",
+        icon_url="https://cdn.discordapp.com/attachments/781466869688827904/783697044233519134/radio_2.png"
+    )
+    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/781466869688827904/783697044233519134/radio_2.png")
+    embed.set_footer(text="radio-id")
     await ctx.send(embed=embed)
 
 
