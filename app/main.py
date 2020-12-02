@@ -8,24 +8,24 @@ from static import get_radio_stream, get_radio_list
 
 load_dotenv()
 
-PREFIX = "!radio "
+PREFIX = "!radio"
 TOKEN = os.getenv("DISCORD_TOKEN")
 if os.environ.get("ENVIRONMENT") == "dev":
-    PREFIX = "!r "
+    PREFIX = "!r"
     TOKEN = os.getenv("DISCORD_TOKEN_DEV")
 
 if TOKEN is None:
     print("CONFIG ERROR: Please state your discord bot token in .env")
     exit()
 
-bot = commands.Bot(command_prefix=PREFIX, description="A bot to play Indonesian radio station")
+bot = commands.Bot(command_prefix=f"{PREFIX} ", description="A bot to play Indonesian radio station")
 
 
 @bot.event
 async def on_ready():
     print(f"{bot.user.name} has connected to Discord!")
     print(f"Currently added by {len(bot.guilds)} servers")
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=f"type `{PREFIX}help` to use this bot."))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=f"`{PREFIX} help` to use this bot."))
 
 
 @commands.is_owner()
@@ -36,7 +36,7 @@ async def _change_presence(ctx, *status):
     """
 
     if not status:
-        status = f"type `{PREFIX}help` to use this bot."
+        status = f"`{PREFIX} help` to use this bot."
     else:
         status = " ".join(status[:])
 
@@ -72,7 +72,7 @@ async def join_or_move(ctx, channel):
         # check if already connected to vc/no
         if vc:
             if vc.is_playing() is True:
-                await ctx.send("Radio is playing a station, use `!radio stop` to stop current session.")
+                await ctx.send(f"Radio is playing a station, use `{PREFIX} stop` to stop current session.")
                 return
             if vc.channel.id != channel.id:
                 await vc.move_to(channel)
@@ -122,7 +122,7 @@ async def _list(ctx):
 
     message = "List of available stations:\n"
     message += "\n".join([f":radio: {radio}" for radio in get_radio_list()])
-    message += "\nuse `!radio play {station}` to start playing it"
+    message += f"\nuse `{PREFIX} play <station>` to start playing it"
     await ctx.send(message)
     return
 
@@ -139,7 +139,7 @@ async def _play(ctx, station):
         source = get_radio_stream(station)
 
         if source is None:
-            await ctx.send(f"Unknown station {station}, use `!radio list` to get list of available station")
+            await ctx.send(f"Unknown station {station}, use `{PREFIX} list` to get list of available station")
             return
 
         try:
@@ -287,7 +287,7 @@ async def info_error(ctx, error):
         except AttributeError:
             await ctx.send("You need to be in voice channel")
             return
-        await ctx.send("Please specify radio station, use `!radio list` to get list of available station")
+        await ctx.send(f"Please specify radio station, use `{PREFIX} list` to get list of available station")
 
 
 @bot.event
@@ -298,7 +298,7 @@ async def on_command_error(ctx, error):
         return
 
     if isinstance(error, commands.CommandNotFound):
-        await ctx.send(f"{str(error)}, use `!radio help` to list available commands")
+        await ctx.send(f"{str(error)}, use `{PREFIX} help` to list available commands")
         return
 
     if isinstance(error, commands.ChannelNotFound):
