@@ -88,6 +88,7 @@ async def join_or_move(ctx, channel):
 
 
 @commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
+@commands.guild_only()
 @bot.command(name="join")
 async def _join(ctx, *, channel: discord.VoiceChannel = None):
     """
@@ -112,6 +113,7 @@ async def _join(ctx, *, channel: discord.VoiceChannel = None):
 
 
 @commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
+@commands.guild_only()
 @bot.command("list")
 async def _list(ctx):
     """
@@ -126,6 +128,7 @@ async def _list(ctx):
 
 
 @commands.cooldown(rate=1, per=5, type=commands.BucketType.guild)
+@commands.guild_only()
 @bot.command(name="play")
 async def _play(ctx, station):
     """
@@ -192,6 +195,7 @@ async def _play(ctx, station):
 
 
 @bot.command("playing")
+@commands.guild_only()
 async def _playing(ctx):
     """
     Get what's playing now, if any
@@ -210,6 +214,7 @@ async def _playing(ctx):
 
 
 @commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
+@commands.guild_only()
 @bot.command("stop")
 async def _stop(ctx):
     """
@@ -231,6 +236,7 @@ async def _stop(ctx):
 
 
 @commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
+@commands.guild_only()
 @bot.command("leave")
 async def _leave(ctx):
     """
@@ -248,6 +254,7 @@ async def _leave(ctx):
 
 
 @bot.command("ping")
+@commands.guild_only()
 async def _ping(ctx):
     """
     Check latency between a HEARTBEAT and a HEARTBEAT_ACK in seconds
@@ -303,6 +310,10 @@ async def on_command_error(ctx, error):
         return
 
     if isinstance(error, commands.MissingRequiredArgument):
+        return
+
+    if isinstance(error, commands.NoPrivateMessage):
+        await ctx.send(str(error))
         return
 
     await ctx.send(str(error))
