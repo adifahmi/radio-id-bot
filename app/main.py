@@ -18,6 +18,8 @@ if TOKEN is None:
     print("CONFIG ERROR: Please state your discord bot token in .env")
     exit()
 
+NOW_PLAYING = {}
+
 
 help_command = commands.DefaultHelpCommand(
     no_category='Commands'
@@ -68,6 +70,11 @@ async def _stats(ctx):
 
     await ctx.send(f"{guild_list_msg}\n")
     await ctx.send(f"Total members: {total_member}")
+
+    await ctx.send("=="*30)
+    print(f"NP {NOW_PLAYING}")
+    for _, np in NOW_PLAYING.items():
+        await ctx.send(f"Now playing {np['station']} on {np['guild_name']}\n")
     return
 
 
@@ -177,6 +184,7 @@ async def _play(ctx, station):
 
         try:
             vc.play(discord.FFmpegPCMAudio(source), after=_vc_end)
+            NOW_PLAYING[ctx.guild.id] = {"station": station, "guild_name": ctx.guild.name}
         except Exception as e:
             print(f"Error playing {station} | {e}")
             await ctx.send(f"Error when trying to play {station}")
@@ -191,6 +199,7 @@ async def _play(ctx, station):
                     await ctx.send(f"No one on **{channel}**, radio will leave in 3s")
                     await asyncio.sleep(3)
                     await vc.disconnect()
+                    NOW_PLAYING.pop(ctx.guild.id, None)  # Remove from NP
                     break
             else:
                 break
@@ -215,7 +224,8 @@ async def _playing(ctx):
         await ctx.send("Radio is not playing anything")
         return
 
-    await ctx.send(f"Radio is playing {vc.source}")
+    np = NOW_PLAYING.get(ctx.guild.id)
+    await ctx.send(f"Radio is playing **{np['station']}** :loud_sound:")
 
 
 @commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
@@ -237,6 +247,7 @@ async def _stop(ctx):
 
     await ctx.send("Stopping...")
     vc.stop()
+    NOW_PLAYING.pop(ctx.guild.id, None)
     await asyncio.sleep(3)
 
 
@@ -254,6 +265,7 @@ async def _leave(ctx):
         return
 
     await vc.disconnect()
+    NOW_PLAYING.pop(ctx.guild.id, None)
     await asyncio.sleep(2)
     await ctx.send("Radio have left the voice channel")
 
