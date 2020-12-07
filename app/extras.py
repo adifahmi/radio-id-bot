@@ -1,7 +1,7 @@
 import discord
 
 from discord.ext import commands
-from external_api import ksoft
+from .external_api import ksoft
 
 
 class Extras(commands.Cog):

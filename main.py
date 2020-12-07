@@ -3,8 +3,8 @@ import os
 
 from discord.ext import commands
 from dotenv import load_dotenv
-from player import RadioPlayer
-from extras import Extras
+from app.player import RadioPlayer
+from app.extras import Extras
 
 load_dotenv()
 

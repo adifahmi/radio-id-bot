@@ -2,7 +2,7 @@ import asyncio
 import discord
 
 from discord.ext import commands
-from static import get_radio_stream, get_radio_list
+from .static import get_radio_stream, get_radio_list
 
 NOW_PLAYING = {}
 

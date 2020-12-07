@@ -34,6 +34,9 @@ Leave voice channel
 * `!radio about`
 About this bot
 
+* `!radio lyrics <song-name>`
+Get lyrics based on provided query, lyrics provided by [ksoft.si](https://ksoft.si/)
+
 ## References
 * https://discordpy.readthedocs.io/en/latest/
 * https://stackoverflow.com/a/62495928/4844294
@@ -55,7 +58,7 @@ Create `.env` file and put your discord bot token on it\
 Create `stations.yaml` file (follow the example) and store your radio stations list there\
 Run the python
 
-    python app/main.py
+    python main.py
     
 ## About
 
