@@ -1,10 +1,10 @@
-import asyncio
 import discord
 import os
 
 from discord.ext import commands
 from dotenv import load_dotenv
-from static import get_radio_stream, get_radio_list
+from player import RadioPlayer
+from extras import Extras
 
 load_dotenv()
 
@@ -18,11 +18,9 @@ if TOKEN is None:
     print("CONFIG ERROR: Please state your discord bot token in .env")
     exit()
 
-NOW_PLAYING = {}
-
 
 help_command = commands.DefaultHelpCommand(
-    no_category='Commands'
+    no_category='Basic'
 )
 
 bot = commands.Bot(command_prefix=f"{PREFIX} ", description="A bot to play Indonesian radio station", help_command=help_command)
@@ -35,294 +33,9 @@ async def on_ready():
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=f"`{PREFIX} help` to use this bot."))
 
 
-@commands.is_owner()
-@bot.command("presence", hidden=True)
-async def _change_presence(ctx, *status):
-    """
-    Change status of this bot (owner only)
-    """
-
-    if not status:
-        status = f"`{PREFIX} help` to use this bot."
-    else:
-        status = " ".join(status[:])
-
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=status))
-
-    await ctx.send(f"Status changed to:\n{status}")
-    return
-
-
-@commands.is_owner()
-@bot.command("stats", hidden=True)
-async def _stats(ctx):
-    """
-    Show some stats of this bot (owner only)
-    """
-
-    await ctx.send(f"Added by {len(bot.guilds)} servers")
-
-    total_member = 0
-    guild_list_msg = "List of servers:\n"
-    for guild in bot.guilds:
-        guild_list_msg += f"• {guild.name} ({guild.member_count} members)\n"
-        total_member += guild.member_count
-
-    await ctx.send(f"{guild_list_msg}\n")
-    await ctx.send(f"Total members: {total_member}")
-
-    await ctx.send("=="*30)
-    print(f"NP {NOW_PLAYING}")
-    for _, np in NOW_PLAYING.items():
-        await ctx.send(f"Now playing {np['station']} on {np['guild_name']}\n")
-    return
-
-
-async def join_or_move(ctx, channel):
-    vc = ctx.voice_client
-    try:
-        # check if already connected to vc/no
-        if vc:
-            if vc.is_playing() is True:
-                await ctx.send(f"Radio is playing a station, use `{PREFIX} stop` to stop current session.")
-                return
-            if vc.channel.id != channel.id:
-                await vc.move_to(channel)
-                await ctx.send(f"Moved to: **{channel}**")
-        else:
-            await channel.connect()
-            vc = ctx.voice_client
-            await ctx.send(f"Connected to: **{channel}**")
-    except asyncio.TimeoutError:
-        await ctx.send(f"Connecting to channel: <{channel}> timed out")
-        return
-    return vc
-
-
-@commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
-@commands.guild_only()
-@bot.command(name="join")
-async def _join(ctx, *, channel: discord.VoiceChannel = None):
-    """
-    Connect this bot to a voice channel
-
-    Params:
-    - channel: discord.VoiceChannel [Optional]
-        The channel to connect to. If a channel is not specified, an attempt to join the voice channel you are in
-        will be made.
-    """
-
-    # if channel is not passed, will try to connect to same channel as author
-    if not channel:
-        try:
-            channel = ctx.author.voice.channel
-        except AttributeError:
-            await ctx.send("No channel to join. Please either specify a valid channel or join one.")
-            return
-
-    await join_or_move(ctx, channel)
-    return
-
-
-@commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
-@commands.guild_only()
-@bot.command("list")
-async def _list(ctx):
-    """
-    Show list of available radio stations
-    """
-
-    message = "List of available stations:\n"
-    message += "\n".join([f":radio: {radio}" for radio in get_radio_list()])
-    message += f"\nuse `{PREFIX} play <station>` to start playing it"
-    await ctx.send(message)
-    return
-
-
-@commands.cooldown(rate=1, per=5, type=commands.BucketType.guild)
-@commands.guild_only()
-@bot.command(name="play")
-async def _play(ctx, station):
-    """
-    Play a radio station based on user input
-    """
-
-    try:
-        source = get_radio_stream(station)
-
-        if source is None:
-            await ctx.send(f"Unknown station {station}, use `{PREFIX} list` to get list of available station")
-            return
-
-        try:
-            channel = ctx.author.voice.channel
-        except AttributeError:
-            await ctx.send("You need to be in voice channel")
-            return
-
-        print(f"Initiate radio play on {ctx.guild.name} - {channel}, station: {station}")
-
-        vc = await join_or_move(ctx, channel)
-        if vc is None:
-            return
-
-        await ctx.send(f"Start playing **{station}** :loud_sound:")
-        await asyncio.sleep(1)
-
-        # this function is called after the audio source has been exhausted or an error occurred
-        def _vc_end(error):
-            stop_msg = "Radio stopped :mute:"
-            if error:
-                stop_msg += f" because of {error}"
-            coroutine = ctx.send(stop_msg)
-            fut = asyncio.run_coroutine_threadsafe(coroutine, bot.loop)
-            try:
-                fut.result()
-            except Exception as err:
-                print(f"Error sending vc end message: {str(err)}")
-            return
-
-        try:
-            vc.play(discord.FFmpegPCMAudio(source), after=_vc_end)
-            NOW_PLAYING[ctx.guild.id] = {"station": station, "guild_name": ctx.guild.name}
-        except Exception as e:
-            print(f"Error playing {station} | {e}")
-            await ctx.send(f"Error when trying to play {station}")
-
-        # Handle lonely bot
-        # if bot is alone in voice channel, it will stop the radio and leave
-        while True:
-            await asyncio.sleep(10)
-            if vc.is_playing():
-                await asyncio.sleep(5)
-                if len(channel.voice_states) < 2:
-                    await ctx.send(f"No one on **{channel}**, radio will leave in 3s")
-                    await asyncio.sleep(3)
-                    await vc.disconnect()
-                    NOW_PLAYING.pop(ctx.guild.id, None)  # Remove from NP
-                    break
-            else:
-                break
-
-    except Exception as e:
-        await ctx.send(f"A client exception occured:\n`{e}`")
-
-
-@bot.command("playing")
-@commands.guild_only()
-async def _playing(ctx):
-    """
-    Get what's playing now, if any
-    """
-    vc = ctx.voice_client
-
-    if not vc:
-        await ctx.send("Radio is not playing anything")
-        return
-
-    if vc.is_playing() is False:
-        await ctx.send("Radio is not playing anything")
-        return
-
-    np = NOW_PLAYING.get(ctx.guild.id)
-    await ctx.send(f"Radio is playing **{np['station']}** :loud_sound:")
-
-
-@commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
-@commands.guild_only()
-@bot.command("stop")
-async def _stop(ctx):
-    """
-    Stop current radio play
-    """
-    vc = ctx.voice_client
-
-    if not vc:
-        await ctx.send("Radio not in a voice channel")
-        return
-
-    if vc.is_playing() is False:
-        await ctx.send("Radio not playing anything")
-        return
-
-    await ctx.send("Stopping...")
-    vc.stop()
-    NOW_PLAYING.pop(ctx.guild.id, None)
-    await asyncio.sleep(3)
-
-
-@commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
-@commands.guild_only()
-@bot.command("leave")
-async def _leave(ctx):
-    """
-    Disconnect from a voice channel, if in one
-    """
-    vc = ctx.voice_client
-
-    if not vc:
-        await ctx.send("Radio not in a voice channel")
-        return
-
-    await vc.disconnect()
-    NOW_PLAYING.pop(ctx.guild.id, None)
-    await asyncio.sleep(2)
-    await ctx.send("Radio have left the voice channel")
-
-
-@commands.guild_only()
-@bot.command("ping", hidden=True)
-async def _ping(ctx):
-    """
-    Check latency between a HEARTBEAT and a HEARTBEAT_ACK in seconds
-    """
-    vc = ctx.voice_client
-
-    if not vc:
-        await ctx.send("Radio not in a voice channel")
-        return
-
-    latency = vc.latency
-    await ctx.send(f"Radio bot voice latency is {latency} seconds")
-
-
-@bot.command("about")
-async def _about(ctx):
-    """
-    About this bot
-    """
-
-    embed = discord.Embed(
-        title="Radio Indonesia",
-        url="https://github.com/AdiFahmi/radio-id-bot",
-        description="Radio-id-bot is a simple Discord Music Bot built with discord.py \
-            to play a radio from some Indonesian radio-station.\
-                 It's also open source on [Github](https://github.com/AdiFahmi/radio-id-bot)!",
-        color=0x9395a5
-    )
-    embed.set_author(
-        name="Adi Fahmi",
-        url="https://twitter.com/adifahmii",
-        icon_url="https://cdn.discordapp.com/attachments/781466869688827904/783697044233519134/radio_2.png"
-    )
-    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/781466869688827904/783697044233519134/radio_2.png")
-    embed.set_footer(text="radio-id")
-    await ctx.send(embed=embed)
-
-
-@_play.error
-async def info_error(ctx, error):
-    if isinstance(error, commands.MissingRequiredArgument):
-        try:
-            ctx.author.voice.channel
-        except AttributeError:
-            await ctx.send("You need to be in voice channel")
-            return
-        await ctx.send(f"Please specify radio station, use `{PREFIX} list` to get list of available station")
-
-
 @bot.event
 async def on_command_error(ctx, error):
+    raise error
     if isinstance(error, commands.CommandOnCooldown):
         cd = "{:.2f}".format(error.retry_after)
         await ctx.send(f"This command is on a {cd}s cooldown")
@@ -351,4 +64,6 @@ async def on_command_error(ctx, error):
     raise error
 
 
+bot.add_cog(RadioPlayer(bot, PREFIX))
+bot.add_cog(Extras(bot, PREFIX))
 bot.run(TOKEN)
