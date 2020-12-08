@@ -1,5 +1,6 @@
-requests==2.25.0
 discord.py==1.5.1
+requests==2.25.0
+tabulate==0.8.7
 discord==1.0.1
 python-dotenv==0.15.0
 PyYAML==5.3.1

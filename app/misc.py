@@ -1,6 +1,10 @@
 import discord
 
 from discord.ext import commands
+from tabulate import tabulate
+
+from .player import NOW_PLAYING
+from .utils import chunk_list
 
 
 class Misc(commands.Cog):
@@ -31,22 +35,32 @@ class Misc(commands.Cog):
         """
         Show some stats of this bot (owner only)
         """
+        total_guild = len(self.bot.guilds)
+        await ctx.send(f"Added by {total_guild} servers")
 
-        await ctx.send(f"Added by {len(self.bot.guilds)} servers")
+        chunk_guild = chunk_list(self.bot.guilds, total_guild / 20)
 
+        await ctx.send("List of servers:")
+        guild_list = []
         total_member = 0
-        guild_list_msg = "List of servers:\n"
-        for guild in self.bot.guilds:
-            guild_list_msg += f"• {guild.name} ({guild.member_count} members)\n"
-            total_member += guild.member_count
+        for guilds in chunk_guild:
+            for guild in guilds:
+                guild_list.append([guild.name, guild.member_count])
+                total_member += guild.member_count
 
-        await ctx.send(f"{guild_list_msg}\n")
+        await ctx.send(f'```{tabulate(guild_list, tablefmt="fancy_grid")}```')
         await ctx.send(f"Total members: {total_member}")
+        return
 
-        # await ctx.send("==" * 30)
-        # print(f"NP {NOW_PLAYING}")
-        # for _, np in NOW_PLAYING.items():
-        #     await ctx.send(f"Now playing {np['station']} on {np['guild_name']}\n")
+    @commands.is_owner()
+    @commands.command("np", hidden=True)
+    async def _np(self, ctx):
+        """
+        List of server playing radio and the station
+        """
+        await ctx.send(f"Playing on {len(NOW_PLAYING)} servers: ")
+        for _, np in NOW_PLAYING.items():
+            await ctx.send(f"• Playing **{np['station']}** on **{np['guild_name']}**\n")
         return
 
     @commands.guild_only()
