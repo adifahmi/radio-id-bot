@@ -102,6 +102,7 @@ class RadioPlayer(commands.Cog):
 
             # this function is called after the audio source has been exhausted or an error occurred
             def _vc_end(error):
+                NOW_PLAYING.pop(ctx.guild.id, None)  # Remove from NP
                 stop_msg = "Radio stopped :mute:"
                 if error:
                     stop_msg += f" because of {error}"
@@ -130,7 +131,7 @@ class RadioPlayer(commands.Cog):
                         await ctx.send(f"No one on **{channel}**, radio will leave in 3s")
                         await asyncio.sleep(3)
                         await vc.disconnect()
-                        NOW_PLAYING.pop(ctx.guild.id, None)  # Remove from NP
+                        NOW_PLAYING.pop(ctx.guild.id, None)
                         break
                 else:
                     break
