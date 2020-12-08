@@ -38,7 +38,7 @@ class Misc(commands.Cog):
         total_guild = len(self.bot.guilds)
         await ctx.send(f"Added by {total_guild} servers")
 
-        chunk_guild = chunk_list(self.bot.guilds, total_guild / 20)
+        chunk_guild = chunk_list(self.bot.guilds, total_guild / 10)
 
         await ctx.send("List of servers:")
         guild_list = []
