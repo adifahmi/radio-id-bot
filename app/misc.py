@@ -109,16 +109,11 @@ class Misc(commands.Cog):
     @commands.command("ping", hidden=True)
     async def _ping(self, ctx):
         """
-        Check latency between a HEARTBEAT and a HEARTBEAT_ACK in seconds
+        Discord WebSocket protocol latency
         """
-        vc = ctx.voice_client
 
-        if not vc:
-            await ctx.send("Radio not in a voice channel")
-            return
-
-        latency = vc.latency
-        await ctx.send(f"Radio bot voice latency is {latency} seconds")
+        lat = self.bot.latency
+        await ctx.send(f"Radio bot latency is ~{round(lat, 2)} seconds")
 
     @commands.command("about")
     async def _about(self, ctx):
