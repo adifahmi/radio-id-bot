@@ -42,11 +42,13 @@ class Misc(commands.Cog):
 
         await ctx.send("List of servers:")
         total_member = 0
+        num = 1
         for guilds in chunk_guild:
             guild_list = []
             for guild in guilds:
-                guild_list.append([guild.name, guild.member_count])
+                guild_list.append([num, guild.name, guild.member_count])
                 total_member += guild.member_count
+                num += 1
             await ctx.send(f'```{tabulate(guild_list, tablefmt="fancy_grid")}```')
 
         await ctx.send(f"Total members: {total_member}")
