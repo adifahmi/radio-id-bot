@@ -71,7 +71,7 @@ class Misc(commands.Cog):
         total_page = len(guild_table)
         current_page = 1
 
-        msg = await ctx.send(f"{guild_table[current_page]} Page {current_page} of {total_page} ")
+        msg = await ctx.send(f"{guild_table[current_page]} Page {current_page} of {total_page}")
         await self.page_reaction(msg, total_page, current_page)
 
         await ctx.send(f"Total members: {total_member}")
@@ -82,9 +82,8 @@ class Misc(commands.Cog):
                 reaction, _ = await self.bot.wait_for('reaction_add', timeout=5.0)
                 await msg.clear_reactions()
                 current_page = get_page(current_page, reaction)
-                await msg.edit(content=f"{guild_table[current_page]} Page {current_page} of {total_page} ")
+                await msg.edit(content=f"{guild_table[current_page]} Page {current_page} of {total_page}")
                 await self.page_reaction(msg, total_page, current_page)
-
                 await asyncio.sleep(1)
             except asyncio.TimeoutError:
                 await msg.clear_reactions()
