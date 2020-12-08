@@ -106,10 +106,10 @@ class Misc(commands.Cog):
         return
 
     @commands.guild_only()
-    @commands.command("ping", hidden=True)
+    @commands.command("ping")
     async def _ping(self, ctx):
         """
-        Discord WebSocket protocol latency
+        This bot latency
         """
 
         lat = self.bot.latency
