@@ -36,6 +36,9 @@ async def on_ready():
 
 @bot.event
 async def on_command_error(ctx, error):
+    if os.environ.get("ENVIRONMENT") == "dev":
+        raise error
+
     if isinstance(error, commands.CommandOnCooldown):
         cd = "{:.2f}".format(error.retry_after)
         await ctx.send(f"This command is on a {cd}s cooldown")
