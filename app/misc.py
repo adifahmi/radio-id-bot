@@ -43,6 +43,7 @@ class Misc(commands.Cog):
         return
 
     @commands.is_owner()
+    @commands.has_permissions(manage_messages=False)
     @commands.command("stats", hidden=True)
     async def _stats(self, ctx):
         """
