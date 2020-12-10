@@ -79,16 +79,16 @@ class RadioPlayer(commands.Cog):
         """
 
         try:
+            channel = ctx.author.voice.channel
+        except AttributeError:
+            await ctx.send("You need to be in voice channel")
+            return
+
+        try:
             source = get_radio_stream(station)
 
             if source is None:
                 await ctx.send(f"Unknown station {station}, use `{self.prefix} list` to get list of available station")
-                return
-
-            try:
-                channel = ctx.author.voice.channel
-            except AttributeError:
-                await ctx.send("You need to be in voice channel")
                 return
 
             print(f"Initiate radio play on {ctx.guild.name} - {channel}, station: {station}")
@@ -207,3 +207,4 @@ class RadioPlayer(commands.Cog):
                 await ctx.send("You need to be in voice channel")
                 return
             await ctx.send(f"Please specify radio station, use `{self.prefix} list` to get list of available station")
+            return
