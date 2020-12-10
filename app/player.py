@@ -3,6 +3,7 @@ import discord
 
 from discord.ext import commands
 from .static import get_radio_stream, get_radio_list
+from .utils import is_valid_url
 
 NOW_PLAYING = {}
 
@@ -73,10 +74,15 @@ class RadioPlayer(commands.Cog):
     @commands.cooldown(rate=1, per=5, type=commands.BucketType.guild)
     @commands.guild_only()
     @commands.command(name="play")
-    async def _play(self, ctx, station):
+    async def _play(self, ctx, *station):
         """
         Play a radio station based on user input
         """
+        if not station:
+            await ctx.send(f"Please specify radio station, use `{self.prefix} list` to get list of available station")
+            return
+
+        station = " ".join(station[:])
 
         try:
             channel = ctx.author.voice.channel
@@ -84,13 +90,15 @@ class RadioPlayer(commands.Cog):
             await ctx.send("You need to be in voice channel")
             return
 
-        try:
+        if is_valid_url(station) is True:
+            source = station
+        else:
             source = get_radio_stream(station)
-
             if source is None:
-                await ctx.send(f"Unknown station {station}, use `{self.prefix} list` to get list of available station")
+                await ctx.send(f"Unknown station **{station}**, use `{self.prefix} list` to get list of available station")
                 return
 
+        try:
             print(f"Initiate radio play on {ctx.guild.name} - {channel}, station: {station}")
 
             vc = await self.join_or_move(ctx, channel)
@@ -197,14 +205,3 @@ class RadioPlayer(commands.Cog):
         NOW_PLAYING.pop(ctx.guild.id, None)
         await asyncio.sleep(2)
         await ctx.send("Radio have left the voice channel")
-
-    @_play.error
-    async def info_error(self, ctx, error):
-        if isinstance(error, commands.MissingRequiredArgument):
-            try:
-                ctx.author.voice.channel
-            except AttributeError:
-                await ctx.send("You need to be in voice channel")
-                return
-            await ctx.send(f"Please specify radio station, use `{self.prefix} list` to get list of available station")
-            return
