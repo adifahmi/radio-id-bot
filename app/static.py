@@ -10,11 +10,16 @@ except KeyError:
     exit()
 
 
+def hot_load_stations():
+    return yaml.load(open('stations.yaml'), Loader=yaml.FullLoader)['radio-stations']
+
+
 def get_radio_stream(radio):
-    return RADIO_STATIONS.get(radio)
+    return hot_load_stations().get(radio)
 
 
 def get_radio_list():
-    if RADIO_STATIONS is None:
+    stations = hot_load_stations()
+    if stations is None:
         return []
-    return [k for k in RADIO_STATIONS.keys()]
+    return [k for k in stations.keys()]
