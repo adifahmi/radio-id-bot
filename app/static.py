@@ -22,4 +22,5 @@ def get_radio_list():
     stations = hot_load_stations()
     if stations is None:
         return []
-    return [k for k in stations.keys()]
+    stations_name = [k for k in stations.keys()]
+    return sorted(stations_name, key=str.lower)
