@@ -65,10 +65,10 @@ class RadioPlayer(commands.Cog):
         Show list of available radio stations
         """
 
-        message = "List of available stations:\n"
-        message += "\n".join([f":radio: {radio}" for radio in get_radio_list()])
-        message += f"\nuse `{self.prefix} play <station>` to start playing it"
-        await ctx.send(message)
+        await ctx.send("List of available stations:")
+        radio_list = "\n".join([f"📻 {radio}" for radio in get_radio_list()])
+        await ctx.send(f"```{radio_list}```")
+        await ctx.send(f"\nuse `{self.prefix} play <station>` to start playing it")
         return
 
     @commands.cooldown(rate=1, per=5, type=commands.BucketType.guild)
