@@ -1,17 +1,22 @@
 import asyncio
 import discord
 
-from discord.ext import commands
+from discord.ext import commands, tasks
 from tabulate import tabulate
 
+from .external_api.dbl import post_bot_server_count
 from .player import NOW_PLAYING
 from .utils import chunk_list, get_page
+
+RADIOID_SERVER_CHANNEL_ID = 787685233301782539  # Default channel ID of this bot support server
+RADIOID_BOT_ID = 777757482687922198  # This bot ID
 
 
 class Misc(commands.Cog):
     def __init__(self, bot, prefix):
         self.bot = bot
         self.prefix = prefix
+        self.post_server_cnt.start()
 
     @commands.is_owner()
     @commands.command("presence", hidden=True)
@@ -138,3 +143,21 @@ class Misc(commands.Cog):
         embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/781466869688827904/783697044233519134/radio_2.png")
         embed.set_footer(text="radio-id")
         await ctx.send(embed=embed)
+
+    @tasks.loop(seconds=10800.0)
+    async def post_server_cnt(self):
+        channel = self.bot.get_channel(RADIOID_SERVER_CHANNEL_ID)
+        total_guild_add = len(self.bot.guilds)
+        await channel.send(f"Bot added by: {total_guild_add} servers")
+        try:
+            res, info = post_bot_server_count(RADIOID_BOT_ID, total_guild_add)
+            if res is None:
+                await channel.send(f"Failed to update bot server count\n```{info}```")
+            else:
+                await channel.send(f"Success update bot server count\n```{info}```")
+        except Exception as e:
+            await channel.send(f"Failed to update bot server count\n```{e}```")
+
+    @post_server_cnt.before_loop
+    async def before_post_server_cnt(self):
+        await self.bot.wait_until_ready()
