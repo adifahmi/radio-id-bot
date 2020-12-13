@@ -1,3 +1,4 @@
+import math
 import random
 import string
 import re
@@ -107,3 +108,30 @@ def is_valid_url(url):
         r'(?:[/?#][^\s]*)?'  # resource path
         r'\Z', re.IGNORECASE)
     return re.match(regex, url) is not None
+
+
+def split_to_columns(text):
+    lines = text.split("\n")
+    max_len = len(max(lines, key=len))  # find longest text in list
+
+    column = []
+    halflen = int(math.ceil(len(lines) / 2))
+    for x in range(halflen):
+        left_line = lines[x]
+        len_left_line = len(left_line)
+        try:
+            right_lane = lines[x + halflen]
+        except IndexError:
+            right_lane = " "
+        len_right_line = len(right_lane)
+
+        # append space to make it equal with longest line
+        if len_left_line < max_len or len_right_line < max_len:
+            left_line = left_line + " " * (max_len - len_left_line)
+            right_lane = right_lane + " " * (max_len - len_right_line)
+
+        per_line = "   ".join([left_line, right_lane])
+        column.append(per_line)
+
+    column_text = "\n".join(column)
+    return column_text
