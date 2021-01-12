@@ -8,6 +8,7 @@ from tabulate import tabulate
 from .external_api.dbl import post_bot_server_count
 from .player import NOW_PLAYING
 from .utils import chunk_list, get_page
+from .test import check_stream_url
 
 RADIOID_SERVER_CHANNEL_ID = 787685233301782539  # Default channel ID of this bot support server
 RADIOID_BOT_ID = 777757482687922198  # This bot ID
@@ -165,3 +166,17 @@ class Misc(commands.Cog):
     @post_server_cnt.before_loop
     async def before_post_server_cnt(self):
         await self.bot.wait_until_ready()
+
+    @commands.guild_only()
+    @commands.command("url-test")
+    async def _check_url(self, ctx):
+        """
+        Check stream url
+        """
+
+        await ctx.send("Checking stream url ...")
+
+        stat_msgs, _ = check_stream_url()
+        stat_msgs_fmt = '\n'.join(stat_msgs)
+
+        await ctx.send(stat_msgs_fmt)
