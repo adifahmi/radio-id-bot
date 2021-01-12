@@ -1,5 +1,6 @@
 import asyncio
 import discord
+import os
 
 from discord.ext import commands, tasks
 from tabulate import tabulate
@@ -146,6 +147,9 @@ class Misc(commands.Cog):
 
     @tasks.loop(seconds=10800.0)
     async def post_server_cnt(self):
+        if os.environ.get("ENVIRONMENT") == "dev":
+            return
+
         channel = self.bot.get_channel(RADIOID_SERVER_CHANNEL_ID)
         total_guild_add = len(self.bot.guilds)
         await channel.send(f"Bot added by: {total_guild_add} servers")
