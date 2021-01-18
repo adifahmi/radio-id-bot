@@ -68,7 +68,8 @@ class RadioPlayer(commands.Cog):
         await ctx.send("List of available stations:")
         radio_list = "\n".join([f"📻 {radio}" for radio in get_radio_list()])
         await ctx.send(f"```{radio_list}```")
-        await ctx.send(f"\nuse `{self.prefix} play <station>` to start playing it")
+        await ctx.send(f"\nuse `{self.prefix} play <station>` to start playing it, eg: `{self.prefix} play jak-fm`")
+        await ctx.send(f"Station not listed? type `{self.prefix} support` to join support server and send your request there")
         return
 
     @commands.cooldown(rate=1, per=5, type=commands.BucketType.guild)

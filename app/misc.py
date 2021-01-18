@@ -146,6 +146,21 @@ class Misc(commands.Cog):
         embed.set_footer(text="radio-id")
         await ctx.send(embed=embed)
 
+    @commands.command("support")
+    async def _support(self, ctx):
+        """
+        Link to this bot support server
+        """
+
+        embed = discord.Embed(
+            title="AF Home",
+            url="https://discord.gg/tmY3Jx2THX",
+            description="Support server for radio-id-bot",
+            color=0x9395a5
+        )
+        embed.set_footer(text="radio-id")
+        await ctx.send(embed=embed)
+
     @tasks.loop(seconds=10800.0)
     async def post_server_cnt(self):
         if os.environ.get("ENVIRONMENT") == "dev":
@@ -176,7 +191,17 @@ class Misc(commands.Cog):
 
         await ctx.send("Checking stream url ...")
 
-        stat_msgs, _ = check_stream_url()
-        stat_msgs_fmt = '\n'.join(stat_msgs)
+        stat_msgs, stats = check_stream_url()
+
+        # String fomatting
+        fmt_stat_msgs = []
+        for msg, code in zip(stat_msgs, stats):
+            if code != 200:
+                msg += " :x:"
+            else:
+                msg += " :white_check_mark:"
+            fmt_stat_msgs.append(msg)
+
+        stat_msgs_fmt = '\n'.join(fmt_stat_msgs)
 
         await ctx.send(stat_msgs_fmt)
