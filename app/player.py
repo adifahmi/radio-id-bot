@@ -114,7 +114,7 @@ class RadioPlayer(commands.Cog):
             # this function is called after the audio source has been exhausted or an error occurred
             def _vc_end(error):
                 NOW_PLAYING.pop(ctx.guild.id, None)  # Remove from NP
-                stop_msg = f"Terdapat gangguan pada server **{station}**, Radio berhenti :mute:"
+                stop_msg = f"Berhenti memutar **{station}** :mute:"
                 if error:
                     stop_msg += f" karena {error}"
                 coroutine = ctx.send(stop_msg)
