@@ -24,24 +24,24 @@ help_command = commands.DefaultHelpCommand(
     no_category='Basic'
 )
 
-bot = commands.Bot(command_prefix=f"{PREFIX} ", description="A bot to play Indonesian radio station", help_command=help_command)
+bot = commands.Bot(command_prefix=f"{PREFIX} ", description="Discord bot untuk memainkan radio favoritmu!", help_command=help_command)
 
 
 @bot.event
 async def on_ready():
     print(f"{bot.user.name} has connected to Discord!")
     print(f"Currently added by {len(bot.guilds)} servers")
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=f"`{PREFIX} help` to use this bot."))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=f"`{PREFIX} help` untuk memulai."))
 
 
 @bot.event
 async def on_command_error(ctx, error):
-    if os.environ.get("ENVIRONMENT") == "dev":
-        raise error
+    # if os.environ.get("ENVIRONMENT") == "dev":
+    #     raise error
 
     if isinstance(error, commands.CommandOnCooldown):
         cd = "{:.2f}".format(error.retry_after)
-        await ctx.send(f"This command is on a {cd}s cooldown")
+        await ctx.send(f"Gunakan command ini lagi setelah {cd} detik")
         return
 
     if isinstance(error, commands.CommandNotFound):

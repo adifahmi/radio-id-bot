@@ -28,7 +28,7 @@ class Misc(commands.Cog):
         """
 
         if not status:
-            status = f"`{self.prefix} help` to use this self.bot."
+            status = f"`{self.prefix} help` untuk memulai."
         else:
             status = " ".join(status[:])
 
@@ -117,47 +117,63 @@ class Misc(commands.Cog):
     @commands.command("ping")
     async def _ping(self, ctx):
         """
-        This bot latency
+        Latensi bot ke server
         """
 
         lat = self.bot.latency
-        await ctx.send(f"Radio bot latency is ~{round(lat, 2)} seconds")
+        await ctx.send(f"Latensi bot ke server ~{round(lat, 2)} detik")
 
     @commands.command("about")
     async def _about(self, ctx):
         """
-        About this bot
+        Deskripsi tentang bot ini
         """
 
         embed = discord.Embed(
             title="Radio Indonesia",
             url="https://github.com/AdiFahmi/radio-id-bot",
-            description="Radio-id-bot is a simple Discord Music Bot built with discord.py \
-                to play a radio from some Indonesian radio-station.\
-                    It's also open source on [Github](https://github.com/AdiFahmi/radio-id-bot)!",
+            description="Radio-id-bot adalah discord bot yang sederhana dibuat dengan library discord.py \
+                untuk memainkan stasiun radio favorit kamu.\
+                    Kode bot ini juga terbuka untuk umum di [Github](https://github.com/AdiFahmi/radio-id-bot)!",
             color=0x9395a5
         )
         embed.set_author(
             name="Adi Fahmi",
             url="https://twitter.com/adifahmii",
-            icon_url="https://cdn.discordapp.com/attachments/781466869688827904/783697044233519134/radio_2.png"
+            icon_url="https://cdn.discordapp.com/attachments/781466869688827904/800918212816535552/radio-free-license-400.png"
         )
-        embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/781466869688827904/783697044233519134/radio_2.png")
+        embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/781466869688827904/800918212816535552/radio-free-license-400.png")
         embed.set_footer(text="radio-id")
         await ctx.send(embed=embed)
 
     @commands.command("support")
     async def _support(self, ctx):
         """
-        Link to this bot support server
+        Link ke support server radio-id-bot
         """
 
         embed = discord.Embed(
             title="AF Home",
             url="https://discord.gg/tmY3Jx2THX",
-            description="Support server for radio-id-bot",
+            description="Join server AF Home untuk memberikan masukan",
             color=0x9395a5
         )
+        embed.set_footer(text="radio-id")
+        await ctx.send(embed=embed)
+
+    @commands.command("donate")
+    async def _donasi(self, ctx):
+        """
+        Link donasi untuk pengembangan bot ini
+        """
+
+        embed = discord.Embed(
+            title="Saweria",
+            url="https://saweria.co/radioid",
+            description="Dukung pengembangan bot ini dengan cara berdonasi melalui saweria",
+            color=0x9395a5
+        )
+        embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/781466869688827904/800926776176017429/saweria2.png")
         embed.set_footer(text="radio-id")
         await ctx.send(embed=embed)
 
@@ -186,10 +202,10 @@ class Misc(commands.Cog):
     @commands.command("url-test")
     async def _check_url(self, ctx):
         """
-        Check stream url
+        Periksa stasiun radio
         """
 
-        await ctx.send("Checking stream url ...")
+        await ctx.send("Memeriksa stasiun radio ...")
 
         stat_msgs, stats = check_stream_url()
 

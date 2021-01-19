@@ -14,25 +14,25 @@ class Extras(commands.Cog):
     @commands.command("lyrics")
     async def _lyrics(self, ctx, *query):
         """
-        Get lyrics by query
+        Menampilkan lyric berdasarkan input
         """
         if not query:
-            await ctx.send(f"Please provide a query `{self.prefix} lyrics <song name or artist - song name>`")
+            await ctx.send(f"Silahkan masukan judul lagi terlebih dahulu, contoh: `{self.prefix} lyrics Paramore Still Into You`")
             return
         else:
             query = " ".join(query[:])
 
         resp, info = ksoft.get_lyrics(query)
         if info["status_code"] == 500:
-            await ctx.send("Error fetching result :cry:")
+            await ctx.send("Gagal mendapatkan lyric :cry:")
             return
 
         if info["status_code"] == 404:
-            await ctx.send(f"No matching lyrics found :x:\nplease provide more info `{self.prefix} lyrics <artist - song name>`")
+            await ctx.send("Lagu yang dicari tidak ditemukan :x:\ncoba ganti lagu lain")
             return
 
         if not resp["data"]:
-            await ctx.send("Error fetching response :x:")
+            await ctx.send("Gagal mengekstrak lyric :x:")
             return
 
         top_result = resp["data"][0]
