@@ -108,12 +108,13 @@ class RadioPlayer(commands.Cog):
             if vc is None:
                 return
 
-            await ctx.send(f"Memulai memutar **{station}** :loud_sound:")
+            await ctx.send(f"Mulai memainkan **{station}** :loud_sound:")
             await asyncio.sleep(1)
 
             # this function is called after the audio source has been exhausted or an error occurred
             def _vc_end(error):
                 NOW_PLAYING.pop(ctx.guild.id, None)  # Remove from NP
+
                 stop_msg = f"Berhenti memutar **{station}** :mute:"
                 if error:
                     stop_msg += f" karena {error}"
@@ -138,11 +139,13 @@ class RadioPlayer(commands.Cog):
             # if bot is alone in voice channel, it will stop the radio and leave
             while True:
                 await asyncio.sleep(30)
-                if already_promote is False:
-                    await ctx.send(f"Tahukan kamu? sekarang kamu bisa bantu donasi untuk pengembangan bot ini melalui link saweria di `{self.prefix} donate` :innocent:")
-                already_promote = True
                 if vc.is_playing():
-                    print("CHECKING PLAY STATUS")
+
+                    # send promo message one at a times in a session
+                    if already_promote is False:
+                        await ctx.send(f"Tahukan kamu? sekarang kamu bisa bantu donasi untuk pengembangan bot ini melalui link saweria di `{self.prefix} donate` :innocent:")
+                    already_promote = True
+
                     await asyncio.sleep(5)
                     if len(channel.voice_states) < 2:
                         await ctx.send(f"Voice Channel **{channel}** kosong, radio akan berhenti dalam 3 detik ...")
