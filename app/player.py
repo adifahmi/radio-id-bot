@@ -20,7 +20,7 @@ class RadioPlayer(commands.Cog):
             # check if already connected to vc/no
             if vc:
                 if vc.is_playing() is True:
-                    await ctx.send(f"Radio sedang memutar stasiun radio, ketik `{self.prefix} stop` untuk menghentikan.")
+                    await ctx.send(f"Radio sedang memutar stasiun radio lainnya, ketik `{self.prefix} stop` untuk menghentikan pemutaran terlebih dahulu.")
                     return
                 if vc.channel.id != channel.id:
                     await vc.move_to(channel)
