@@ -132,17 +132,21 @@ class Misc(commands.Cog):
         embed = discord.Embed(
             title="Radio Indonesia",
             url="https://github.com/AdiFahmi/radio-id-bot",
-            description="Radio-id-bot adalah discord bot yang sederhana dibuat dengan library discord.py \
-                untuk memainkan stasiun radio favorit kamu.\
-                    Kode bot ini juga terbuka untuk umum di [Github](https://github.com/AdiFahmi/radio-id-bot)!",
+            description="Radio Indonesia adalah discord bot sederhana yang dibuat menggunakan library discord.py \
+                untuk memainkan stasiun radio favorit kamu.",
             color=0x9395a5
         )
         embed.set_author(
-            name="Adi Fahmi",
+            name="Created by AF",
             url="https://twitter.com/adifahmii",
-            icon_url="https://cdn.discordapp.com/attachments/781466869688827904/800918212816535552/radio-free-license-400.png"
+            icon_url="https://cdn.discordapp.com/attachments/781466869688827904/802388113615486976/AF.png"
         )
         embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/781466869688827904/800918212816535552/radio-free-license-400.png")
+
+        embed.add_field(name="Open source code", value="[Github](https://github.com/AdiFahmi/radio-id-bot)", inline=False)
+        embed.add_field(name="Donasi", value="[Saweria](https://saweria.co/radioid)", inline=False)
+        embed.add_field(name="Vote this bot", value="[top.gg](https://top.gg/bot/777757482687922198), [DBL](https://discordbotlist.com/bots/radio-indonesia)", inline=False)
+        embed.add_field(name="Support server", value="[AF Home](https://discord.gg/tmY3Jx2THX)", inline=False)
         embed.set_footer(text="radio-id")
         await ctx.send(embed=embed)
 
