@@ -27,7 +27,6 @@ def check_stream_url():
             stat = "other_error"
 
         msg = f"• Status for {station} is {stat}"
-        print(msg)
         stat_msgs.append(msg)
         stats.append(stat)
     return stat_msgs, stats

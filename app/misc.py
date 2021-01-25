@@ -6,8 +6,7 @@ from discord.ext import commands, tasks
 from tabulate import tabulate
 
 from .external_api.dbl import post_bot_server_count
-from .player import NOW_PLAYING
-from .utils import chunk_list, get_page
+from .utils import chunk_list, get_page, get_play_cnt, get_all_play
 from .test import check_stream_url
 
 RADIOID_SERVER_CHANNEL_ID = 787685233301782539  # Default channel ID of this bot support server
@@ -108,8 +107,8 @@ class Misc(commands.Cog):
         """
         List of server playing radio and the station
         """
-        await ctx.send(f"Playing on {len(NOW_PLAYING)} servers: ")
-        for _, np in NOW_PLAYING.items():
+        await ctx.send(f"Playing on {get_play_cnt()} servers: ")
+        for _, np in get_all_play().items():
             await ctx.send(f"• Playing **{np['station']}** on **{np['guild_name']}**\n")
         return
 

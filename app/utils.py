@@ -15,6 +15,29 @@ EMOJI_NUMBER = {
     8: '8️⃣',
     9: '9️⃣',
 }
+NOW_PLAYING = {}  # NOW_PLAYING as a dict db, maybe in the future can switch to actual dbms
+
+
+def playing_on_np(guild_id):
+    return NOW_PLAYING.get(guild_id)
+
+
+def add_to_np(guild_id, guild_name, station):
+    NOW_PLAYING[guild_id] = {"station": station, "guild_name": guild_name}
+    return
+
+
+def remove_from_np(guild_id):
+    NOW_PLAYING.pop(guild_id, None)
+    return
+
+
+def get_play_cnt():
+    return len(NOW_PLAYING)
+
+
+def get_all_play():
+    return NOW_PLAYING
 
 
 def generate_random_string(n=10):

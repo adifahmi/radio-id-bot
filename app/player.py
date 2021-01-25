@@ -4,9 +4,7 @@ import random
 
 from discord.ext import commands
 from .static import get_radio_stream, get_radio_list
-from .utils import is_valid_url
-
-NOW_PLAYING = {}
+from .utils import is_valid_url, add_to_np, remove_from_np, playing_on_np
 
 
 class RadioPlayer(commands.Cog):
@@ -113,7 +111,7 @@ class RadioPlayer(commands.Cog):
 
             # this function is called after the audio source has been exhausted or an error occurred
             def _vc_end(error):
-                NOW_PLAYING.pop(ctx.guild.id, None)  # Remove from NP
+                remove_from_np(ctx.guild.id)  # Remove from NP
 
                 stop_msg = f"Berhenti memutar **{station}** :mute:"
                 if error:
@@ -128,7 +126,7 @@ class RadioPlayer(commands.Cog):
 
             try:
                 vc.play(discord.FFmpegPCMAudio(source), after=_vc_end)
-                NOW_PLAYING[ctx.guild.id] = {"station": station, "guild_name": ctx.guild.name}
+                add_to_np(ctx.guild.id, ctx.guild.name, station)  # Add to NP
             except Exception as e:
                 print(f"Error playing {station} | {e}")
                 await ctx.send(f"Terdapat gangguan pada server, gagal memutar {station}")
@@ -151,7 +149,7 @@ class RadioPlayer(commands.Cog):
                         await ctx.send(f"Voice Channel **{channel}** kosong, radio akan berhenti dalam 3 detik ...")
                         await asyncio.sleep(3)
                         await vc.disconnect()
-                        NOW_PLAYING.pop(ctx.guild.id, None)
+                        remove_from_np(ctx.guild.id)
                         break
                 else:
                     break
@@ -175,7 +173,7 @@ class RadioPlayer(commands.Cog):
             await ctx.send("Radio tidak memutar apapun di server ini")
             return
 
-        np = NOW_PLAYING.get(ctx.guild.id)
+        np = playing_on_np(ctx.guild.id)
         await ctx.send(f"Radio sedang memutar **{np['station']}** :loud_sound:")
 
     @commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
@@ -197,7 +195,7 @@ class RadioPlayer(commands.Cog):
 
         await ctx.send("Berhenti ...")
         vc.stop()
-        NOW_PLAYING.pop(ctx.guild.id, None)
+        remove_from_np(ctx.guild.id)
         await asyncio.sleep(3)
 
     @commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
@@ -214,6 +212,6 @@ class RadioPlayer(commands.Cog):
             return
 
         await vc.disconnect()
-        NOW_PLAYING.pop(ctx.guild.id, None)
+        remove_from_np(ctx.guild.id)
         await asyncio.sleep(2)
         await ctx.send("Radio keluar dari Voice Channel")
