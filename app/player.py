@@ -3,14 +3,17 @@ import discord
 import random
 
 from discord.ext import commands
-from .static import get_radio_stream, get_radio_list
-from .utils import is_valid_url, add_to_np, remove_from_np, playing_on_np
+from .utils import (
+    is_valid_url, Stations, Playing
+)
 
 
 class RadioPlayer(commands.Cog):
     def __init__(self, bot, prefix):
         self.bot = bot
         self.prefix = prefix
+        self.playing = Playing()
+        self.stations = Stations()
 
     async def join_or_move(self, ctx, channel):
         vc = ctx.voice_client
@@ -65,9 +68,19 @@ class RadioPlayer(commands.Cog):
         """
 
         await ctx.send("Daftar stasiun radio yang tersedia:")
-        radio_list = "\n".join([f"📻 {radio}" for radio in get_radio_list()])
-        await ctx.send(f"```{radio_list}```")
-        await ctx.send(f"\nketik `{self.prefix} play <stasiun radio>` untuk memulai memutar, contoh: `{self.prefix} play {random.choice(get_radio_list())}`")
+
+        self.stations.reload_station_list()
+        stations_dict = self.stations.get_stations()
+        stations_fmt = ""
+        for station_name, station_attr in stations_dict.items():
+            mark = "✓" if station_attr["status"] == 200 else "X"
+            stations_fmt += f"📻 {station_name} {mark}\n"
+        stations_fmt += "\n✓ = Stasiun radio dapat diputar\n"
+        stations_fmt += "X = Stasiun radio sedang mengalami gangguan\n"
+        stations_list = [k for k in stations_dict.keys()]
+
+        await ctx.send(f"```{stations_fmt}```")
+        await ctx.send(f"\nketik `{self.prefix} play <stasiun radio>` untuk memulai memutar, contoh: `{self.prefix} play {random.choice(stations_list)}`")
         await ctx.send(f"Stasiun favorit kamu tidak tersedia? ketik `{self.prefix} support` untuk gabung ke support server dan silahkan request di sana")
         await ctx.send(f"Kamu juga bisa bantu donasi untuk pengembangan bot ini di `{self.prefix} donate`")
         return
@@ -94,10 +107,12 @@ class RadioPlayer(commands.Cog):
         if is_valid_url(station) is True:
             source = station
         else:
-            source = get_radio_stream(station)
+            self.stations.reload_station_list()
+            source = self.stations.get_stations_by_name(station)
             if source is None:
                 await ctx.send(f"Stasiun **{station}** tidak terdaftar, ketik `{self.prefix} list` untuk melihat daftar stasiun radio")
                 return
+            source = source["url"]
 
         try:
             print(f"Initiate radio play on {ctx.guild.name} - {channel}, station: {station}")
@@ -111,7 +126,7 @@ class RadioPlayer(commands.Cog):
 
             # this function is called after the audio source has been exhausted or an error occurred
             def _vc_end(error):
-                remove_from_np(ctx.guild.id)  # Remove from NP
+                self.playing.remove_from_play(ctx.guild.id)  # Remove from NP
 
                 stop_msg = f"Berhenti memutar **{station}** :mute:"
                 if error:
@@ -126,7 +141,7 @@ class RadioPlayer(commands.Cog):
 
             try:
                 vc.play(discord.FFmpegPCMAudio(source), after=_vc_end)
-                add_to_np(ctx.guild.id, ctx.guild.name, station)  # Add to NP
+                self.playing.add_to_play(ctx.guild.id, ctx.guild.name, station)  # Add to NP
             except Exception as e:
                 print(f"Error playing {station} | {e}")
                 await ctx.send(f"Terdapat gangguan pada server, gagal memutar {station}")
@@ -149,7 +164,7 @@ class RadioPlayer(commands.Cog):
                         await ctx.send(f"Voice Channel **{channel}** kosong, radio akan berhenti dalam 3 detik ...")
                         await asyncio.sleep(3)
                         await vc.disconnect()
-                        remove_from_np(ctx.guild.id)
+                        self.playing.remove_from_play(ctx.guild.id)
                         break
                 else:
                     break
@@ -173,7 +188,7 @@ class RadioPlayer(commands.Cog):
             await ctx.send("Radio tidak memutar apapun di server ini")
             return
 
-        np = playing_on_np(ctx.guild.id)
+        np = self.playing.current_play(ctx.guild.id)
         await ctx.send(f"Radio sedang memutar **{np['station']}** :loud_sound:")
 
     @commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
@@ -195,7 +210,7 @@ class RadioPlayer(commands.Cog):
 
         await ctx.send("Berhenti ...")
         vc.stop()
-        remove_from_np(ctx.guild.id)
+        self.playing.remove_from_play(ctx.guild.id)
         await asyncio.sleep(3)
 
     @commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
@@ -212,6 +227,6 @@ class RadioPlayer(commands.Cog):
             return
 
         await vc.disconnect()
-        remove_from_np(ctx.guild.id)
+        self.playing.remove_from_play(ctx.guild.id)
         await asyncio.sleep(2)
         await ctx.send("Radio keluar dari Voice Channel")

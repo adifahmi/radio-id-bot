@@ -6,11 +6,13 @@ from discord.ext import commands, tasks
 from tabulate import tabulate
 
 from .external_api.dbl import post_bot_server_count
-from .utils import chunk_list, get_page, get_play_cnt, get_all_play
-from .test import check_stream_url
-
-RADIOID_SERVER_CHANNEL_ID = 787685233301782539  # Default channel ID of this bot support server
-RADIOID_BOT_ID = 777757482687922198  # This bot ID
+from .utils import chunk_list, get_page, Playing, Stations
+from .static import (
+    RADIOID_BOT_ID, RADIOID_SERVER_CHANNEL_ID, RADIO_ID_LOGO_URL,
+    BOT_NAME, BOT_DESC, BOT_GITHUB_URL, BOT_TOP_GG_URL, BOT_DBL_URL,
+    BOT_SUPPORT_SERVER_INV, AUTHOR_NAME, AUTHOR_TWITTER_URL, AUTHOR_ICON_URL,
+    SAWERIA_URL
+)
 
 
 class Misc(commands.Cog):
@@ -81,17 +83,18 @@ class Misc(commands.Cog):
         await self.page_reaction(msg, total_page, current_page)
 
         await ctx.send(f"Total members: {total_member}")
-        await asyncio.sleep(1)
 
         if total_page > 1:
             while True:
                 try:
-                    reaction, _ = await self.bot.wait_for('reaction_add', timeout=5.0)
+                    reaction, user = await self.bot.wait_for('reaction_add', timeout=8.0)
+                    # skip self bot reaction
+                    if user.bot is True:
+                        continue
                     await msg.clear_reactions()
                     current_page = get_page(current_page, reaction)
                     await msg.edit(content=f"{guild_table[current_page]} Page {current_page} of {total_page}")
                     await self.page_reaction(msg, total_page, current_page)
-                    await asyncio.sleep(1)
                 except asyncio.TimeoutError:
                     await msg.clear_reactions()
                     break
@@ -107,8 +110,10 @@ class Misc(commands.Cog):
         """
         List of server playing radio and the station
         """
-        await ctx.send(f"Playing on {get_play_cnt()} servers: ")
-        for _, np in get_all_play().items():
+        playing = Playing()
+
+        await ctx.send(f"Playing on {playing.get_play_count()} servers: ")
+        for _, np in playing.get_all_play().items():
             await ctx.send(f"• Playing **{np['station']}** on **{np['guild_name']}**\n")
         return
 
@@ -129,23 +134,22 @@ class Misc(commands.Cog):
         """
 
         embed = discord.Embed(
-            title="Radio Indonesia",
-            url="https://github.com/AdiFahmi/radio-id-bot",
-            description="Radio Indonesia adalah discord bot sederhana yang dibuat menggunakan library discord.py \
-                untuk memainkan stasiun radio favorit kamu.",
+            title=BOT_NAME,
+            url=BOT_GITHUB_URL,
+            description=BOT_DESC,
             color=0x9395a5
         )
         embed.set_author(
-            name="Created by AF",
-            url="https://twitter.com/adifahmii",
-            icon_url="https://cdn.discordapp.com/attachments/781466869688827904/802388113615486976/AF.png"
+            name=AUTHOR_NAME,
+            url=AUTHOR_TWITTER_URL,
+            icon_url=AUTHOR_ICON_URL
         )
-        embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/781466869688827904/800918212816535552/radio-free-license-400.png")
+        embed.set_thumbnail(url=RADIO_ID_LOGO_URL)
 
-        embed.add_field(name="Open source code", value="[Github](https://github.com/AdiFahmi/radio-id-bot)", inline=False)
-        embed.add_field(name="Donasi", value="[Saweria](https://saweria.co/radioid)", inline=False)
-        embed.add_field(name="Vote this bot", value="[top.gg](https://top.gg/bot/777757482687922198), [DBL](https://discordbotlist.com/bots/radio-indonesia)", inline=False)
-        embed.add_field(name="Support server", value="[AF Home](https://discord.gg/tmY3Jx2THX)", inline=False)
+        embed.add_field(name="Open source code", value=f"[Github]({BOT_GITHUB_URL})", inline=False)
+        embed.add_field(name="Donasi", value=f"[Saweria]({SAWERIA_URL})", inline=False)
+        embed.add_field(name="Vote this bot", value=f"[top.gg]({BOT_TOP_GG_URL}), [DBL]({BOT_DBL_URL})", inline=False)
+        embed.add_field(name="Support server", value=f"[AF Home]({BOT_SUPPORT_SERVER_INV})", inline=False)
         embed.set_footer(text="radio-id")
         await ctx.send(embed=embed)
 
@@ -157,7 +161,7 @@ class Misc(commands.Cog):
 
         embed = discord.Embed(
             title="AF Home",
-            url="https://discord.gg/tmY3Jx2THX",
+            url=BOT_SUPPORT_SERVER_INV,
             description="Join server AF Home untuk memberikan masukan",
             color=0x9395a5
         )
@@ -172,7 +176,7 @@ class Misc(commands.Cog):
 
         embed = discord.Embed(
             title="Saweria",
-            url="https://saweria.co/radioid",
+            url=SAWERIA_URL,
             description="Dukung pengembangan bot ini dengan cara berdonasi melalui saweria",
             color=0x9395a5
         )
@@ -202,25 +206,22 @@ class Misc(commands.Cog):
         await self.bot.wait_until_ready()
 
     @commands.guild_only()
-    @commands.command("url-test")
+    @commands.command("station-check")
     async def _check_url(self, ctx):
         """
-        Periksa stasiun radio
+        Periksa URL stream stasiun radio
         """
 
         await ctx.send("Memeriksa stasiun radio ...")
 
-        stat_msgs, stats = check_stream_url()
+        station = Stations()
+        station.update_station_status()
+        stations_dict = station.get_stations()
 
         # String fomatting
-        fmt_stat_msgs = []
-        for msg, code in zip(stat_msgs, stats):
-            if code != 200:
-                msg += " :x:"
-            else:
-                msg += " :white_check_mark:"
-            fmt_stat_msgs.append(msg)
+        stations_fmt = ""
+        for station_name, station_attr in stations_dict.items():
+            mark = ":white_check_mark:" if station_attr["status"] == 200 else ":x:"
+            stations_fmt += f"• Status for {station_name} is `{station_attr['status']}` {mark}\n"
 
-        stat_msgs_fmt = '\n'.join(fmt_stat_msgs)
-
-        await ctx.send(stat_msgs_fmt)
+        await ctx.send(stations_fmt)

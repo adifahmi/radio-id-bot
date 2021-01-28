@@ -2,6 +2,11 @@ import math
 import random
 import string
 import re
+import yaml
+
+from collections import OrderedDict
+from urllib.request import urlopen
+from urllib.error import HTTPError, URLError
 
 EMOJI_NUMBER = {
     0: '0️⃣',
@@ -16,28 +21,97 @@ EMOJI_NUMBER = {
     9: '9️⃣',
 }
 NOW_PLAYING = {}  # NOW_PLAYING as a dict db, maybe in the future can switch to actual dbms
+STATIONS_LIST_STATUS = {}
 
 
-def playing_on_np(guild_id):
-    return NOW_PLAYING.get(guild_id)
+class Stations:
+    def __init__(self):
+        self.stations = STATIONS_LIST_STATUS
+        self.init_station_list()
+
+    def hot_load_stations(self):
+        try:
+            return yaml.load(open('stations.yaml'), Loader=yaml.FullLoader)['radio-stations']
+        except FileNotFoundError:
+            print("CONFIG ERROR: Please create stations.yaml")
+            return None
+        except KeyError:
+            print("CONFIG ERROR: radio-stations not found, can see stations.yaml.example for the yaml format")
+            return None
+
+    def init_station_list(self):
+        loaded_stations = self.hot_load_stations()
+        if loaded_stations is None:
+            self.stations = {}
+            return
+        for station_name, url in loaded_stations.items():
+            self.stations[station_name] = {
+                "url": url,
+                "status": 200
+            }
+
+    def reload_station_list(self):
+        loaded_stations = self.hot_load_stations()
+        if loaded_stations is None:
+            self.stations = {}
+            return
+        station_name_list = [k for k in loaded_stations.keys()]
+
+        # handle removed station
+        for station_name in list(self.stations.keys()):
+            if station_name not in station_name_list:
+                del self.stations[station_name]
+
+        # handle added station
+        for station_name in station_name_list:
+            if station_name not in self.stations.keys():
+                self.stations[station_name] = {
+                    "url": loaded_stations[station_name],
+                    "status": 200
+                }
+
+    def get_stations(self, is_sort=True):
+        if is_sort is True:
+            return OrderedDict(sorted(self.stations.items(), key=lambda t: t[0]))
+        return self.stations
+
+    def get_stations_by_name(self, station_name):
+        return self.stations.get(station_name)
+
+    def update_station_status(self):
+        for station_name, station_attr in self.stations.items():
+            url = station_attr["url"]
+            try:
+                req = urlopen(url)
+                stat = req.getcode()
+            except HTTPError as e:
+                stat = str(e)
+            except URLError as e:
+                stat = str(e)
+            except Exception as e:
+                stat = str(e)
+            print(f"status for {station_name} is {stat}")
+            self.stations[station_name]["status"] = stat
 
 
-def add_to_np(guild_id, guild_name, station):
-    NOW_PLAYING[guild_id] = {"station": station, "guild_name": guild_name}
-    return
+class Playing:
+    def __init__(self):
+        self.np = NOW_PLAYING
 
+    def current_play(self, guild_id):
+        return self.np.get(guild_id)
 
-def remove_from_np(guild_id):
-    NOW_PLAYING.pop(guild_id, None)
-    return
+    def add_to_play(self, guild_id, guild_name, station):
+        self.np[guild_id] = {"station": station, "guild_name": guild_name}
 
+    def remove_from_play(self, guild_id):
+        self.np.pop(guild_id, None)
 
-def get_play_cnt():
-    return len(NOW_PLAYING)
+    def get_play_count(self):
+        return len(self.np)
 
-
-def get_all_play():
-    return NOW_PLAYING
+    def get_all_play(self):
+        return self.np
 
 
 def generate_random_string(n=10):
