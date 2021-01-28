@@ -79,6 +79,8 @@ class Stations:
         return self.stations.get(station_name)
 
     def update_station_status(self):
+        self.reload_station_list()
+        stat_info_dict = {}
         for station_name, station_attr in self.stations.items():
             url = station_attr["url"]
             try:
@@ -92,6 +94,8 @@ class Stations:
                 stat = str(e)
             print(f"status for {station_name} is {stat}")
             self.stations[station_name]["status"] = stat
+            stat_info_dict[station_name] = stat
+        return stat_info_dict
 
 
 class Playing:
