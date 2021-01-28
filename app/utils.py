@@ -159,7 +159,14 @@ def dummy_guilds(n=10):
 
 
 def get_emoji_by_number(num):
-    return EMOJI_NUMBER.get(num)
+    emoji = ""
+    for snum in str(num):
+        try:
+            snum = int(snum)
+        except ValueError:
+            continue
+        emoji += f"{EMOJI_NUMBER.get(snum)} "
+    return emoji
 
 
 def get_number_by_emoji(emoji):
