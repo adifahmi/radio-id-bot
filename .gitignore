@@ -75,5 +75,7 @@ venv*
 .idea/
 .idea/*
 
+# Custom
 .env
 stations.yaml
+devtest.py
