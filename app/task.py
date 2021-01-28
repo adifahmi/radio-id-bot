@@ -22,7 +22,7 @@ class BotTask(commands.Cog):
 
         channel = self.bot.get_channel(RADIOID_SERVER_CHANNEL_ID)
         total_guild_add = len(self.bot.guilds)
-        await channel.send(f"Bot added by: {total_guild_add} servers")
+        await channel.send(f"Bot added by: {get_emoji_by_number(total_guild_add)} servers")
         try:
             res, info = post_bot_server_count(RADIOID_BOT_ID, total_guild_add)
             if res is None:
