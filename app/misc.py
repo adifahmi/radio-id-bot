@@ -6,10 +6,10 @@ from tabulate import tabulate
 
 from .utils import chunk_list, get_page, Playing, Stations
 from .static import (
-    RADIO_ID_LOGO_URL,
-    BOT_NAME, BOT_DESC, BOT_GITHUB_URL, BOT_TOP_GG_URL, BOT_DBL_URL,
-    BOT_SUPPORT_SERVER_INV, AUTHOR_NAME, AUTHOR_TWITTER_URL, AUTHOR_ICON_URL,
-    SAWERIA_URL
+    RADIO_ID_LOGO_URL, BOT_NAME, BOT_DESC, BOT_GITHUB_URL,
+    BOT_TOP_GG_URL, BOT_DBL_URL, BOT_SUPPORT_SERVER_INV,
+    AUTHOR_NAME, AUTHOR_TWITTER_URL, AUTHOR_ICON_URL,
+    SAWERIA_URL, SAWERIA_LOGO_URL
 )
 
 
@@ -177,7 +177,7 @@ class Misc(commands.Cog):
             description="Dukung pengembangan bot ini dengan cara berdonasi melalui saweria",
             color=0x9395a5
         )
-        embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/781466869688827904/800926776176017429/saweria2.png")
+        embed.set_thumbnail(url=SAWERIA_LOGO_URL)
         embed.set_footer(text="radio-id")
         await ctx.send(embed=embed)
 
