@@ -1,14 +1,12 @@
 import asyncio
 import discord
-import os
 
-from discord.ext import commands, tasks
+from discord.ext import commands
 from tabulate import tabulate
 
-from .external_api.dbl import post_bot_server_count
 from .utils import chunk_list, get_page, Playing, Stations
 from .static import (
-    RADIOID_BOT_ID, RADIOID_SERVER_CHANNEL_ID, RADIO_ID_LOGO_URL,
+    RADIO_ID_LOGO_URL,
     BOT_NAME, BOT_DESC, BOT_GITHUB_URL, BOT_TOP_GG_URL, BOT_DBL_URL,
     BOT_SUPPORT_SERVER_INV, AUTHOR_NAME, AUTHOR_TWITTER_URL, AUTHOR_ICON_URL,
     SAWERIA_URL
@@ -19,7 +17,6 @@ class Misc(commands.Cog):
     def __init__(self, bot, prefix):
         self.bot = bot
         self.prefix = prefix
-        self.post_server_cnt.start()
 
     @commands.is_owner()
     @commands.command("presence", hidden=True)
@@ -183,27 +180,6 @@ class Misc(commands.Cog):
         embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/781466869688827904/800926776176017429/saweria2.png")
         embed.set_footer(text="radio-id")
         await ctx.send(embed=embed)
-
-    @tasks.loop(seconds=10800.0)
-    async def post_server_cnt(self):
-        if os.environ.get("ENVIRONMENT") == "dev":
-            return
-
-        channel = self.bot.get_channel(RADIOID_SERVER_CHANNEL_ID)
-        total_guild_add = len(self.bot.guilds)
-        await channel.send(f"Bot added by: {total_guild_add} servers")
-        try:
-            res, info = post_bot_server_count(RADIOID_BOT_ID, total_guild_add)
-            if res is None:
-                await channel.send(f"Failed to update bot server count\n```{info}```")
-            else:
-                await channel.send(f"Success update bot server count\n```{info}```")
-        except Exception as e:
-            await channel.send(f"Failed to update bot server count\n```{e}```")
-
-    @post_server_cnt.before_loop
-    async def before_post_server_cnt(self):
-        await self.bot.wait_until_ready()
 
     @commands.guild_only()
     @commands.command("station-check")
