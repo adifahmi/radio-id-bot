@@ -31,7 +31,7 @@ class RadioPlayer(commands.Cog):
                 vc = ctx.voice_client
                 await ctx.send(f"Radio terhubung ke: **{channel}**")
         except asyncio.TimeoutError:
-            await ctx.send(f"Gagal terhubung ke: <{channel}> timed out")
+            await ctx.send(f"Gagal terhubung ke: **<{channel}>** `Error connection timed out`, silahkan coba ganti server region kamu ke Negara lain, contoh: Japan")
             return
         return vc
 
@@ -130,7 +130,7 @@ class RadioPlayer(commands.Cog):
 
                 stop_msg = f"Berhenti memutar **{station}** :mute:"
                 if error:
-                    stop_msg += f" karena {error}"
+                    stop_msg += f" karena `{error}`"
                 coroutine = ctx.send(stop_msg)
                 fut = asyncio.run_coroutine_threadsafe(coroutine, self.bot.loop)
                 try:
@@ -144,7 +144,7 @@ class RadioPlayer(commands.Cog):
                 self.playing.add_to_play(ctx.guild.id, ctx.guild.name, station)  # Add to NP
             except Exception as e:
                 print(f"Error playing {station} | {e}")
-                await ctx.send(f"Terdapat gangguan pada server, gagal memutar {station}")
+                await ctx.send(f"Terdapat gangguan pada server, gagal memutar **{station}**, silahkan coba ganti server region kamu ke Negara lain, contoh: Japan")
 
             already_promote = False
 
