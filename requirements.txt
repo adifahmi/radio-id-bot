@@ -4,3 +4,4 @@ tabulate==0.8.7
 discord==1.0.1
 python-dotenv==0.15.0
 PyYAML==5.3.1
+PyNaCl==1.4.0
