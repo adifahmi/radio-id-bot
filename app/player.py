@@ -92,6 +92,7 @@ class RadioPlayer(commands.Cog):
         """
         Memainkan stasiun radio berdasarkan pilihan kamu
         """
+
         if not station:
             await ctx.send(f"Silahkan pilih stasiun terlebih dahulu, ketik `{self.prefix} list` untuk melihat daftar stasiun radio")
             return
@@ -178,6 +179,7 @@ class RadioPlayer(commands.Cog):
         """
         Menampilkan stasiun radio yang sedang diputar
         """
+
         vc = ctx.voice_client
 
         if not vc:
@@ -198,6 +200,7 @@ class RadioPlayer(commands.Cog):
         """
         Menghentikan pemutaran radio
         """
+
         vc = ctx.voice_client
 
         if not vc:
@@ -220,6 +223,7 @@ class RadioPlayer(commands.Cog):
         """
         Memutuskan radio dari Voice Channel
         """
+
         vc = ctx.voice_client
 
         if not vc:
