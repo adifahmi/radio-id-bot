@@ -81,23 +81,30 @@ class Stations:
     def get_stations_by_name(self, station_name):
         return self.stations.get(station_name)
 
+    def check_station_url(self, url):
+        try:
+            req = urlopen(url)
+            stat = req.getcode()
+        except HTTPError as e:
+            stat = str(e)
+        except URLError as e:
+            stat = str(e)
+        except Exception as e:
+            stat = str(e)
+        return stat
+
     def update_station_status(self):
         self.reload_station_list()
         stat_info_dict = {}
+
         for station_name, station_attr in self.stations.items():
             url = station_attr["url"]
-            try:
-                req = urlopen(url)
-                stat = req.getcode()
-            except HTTPError as e:
-                stat = str(e)
-            except URLError as e:
-                stat = str(e)
-            except Exception as e:
-                stat = str(e)
+            stat = self.check_station_url(url)
             print(f"status for {station_name} is {stat}")
+
             self.stations[station_name]["status"] = stat
             stat_info_dict[station_name] = stat
+
         return stat_info_dict
 
 
