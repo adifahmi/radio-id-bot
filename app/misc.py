@@ -208,7 +208,7 @@ class Misc(commands.Cog):
     @commands.command("htop")
     async def _htop(self, ctx):
         """
-        Check machine of hosted bot information
+        Get host machine name, cpu, cpu usage, ram and ram usage
         """
 
         init_msg = await ctx.send("Getting info from machine ...")
