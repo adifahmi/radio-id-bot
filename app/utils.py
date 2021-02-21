@@ -3,6 +3,9 @@ import random
 import string
 import re
 import yaml
+import psutil
+import subprocess
+import platform
 
 from collections import OrderedDict
 from urllib.request import urlopen
@@ -243,3 +246,54 @@ def split_to_columns(text):
 
     column_text = "\n".join(column)
     return column_text
+
+
+def convert_size(size_bytes):
+    if size_bytes == 0:
+        return "0B"
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+    return "%s %s" % (s, size_name[i])
+
+
+def get_sys_info():
+    sys_name = f"{platform.system()} - {platform.release()} ({platform.dist()[0]} {platform.dist()[1]} {platform.dist()[2]})"
+
+    total_cpu = psutil.cpu_count()
+    cpu_usage_overall = psutil.cpu_percent(interval=1)
+    cpu_usage_per_cpu = psutil.cpu_percent(interval=1, percpu=True)
+
+    ram = psutil.virtual_memory()
+    total_ram = convert_size(ram.total)
+    ram_usage = convert_size(ram.used)
+    ram_usage_percent = ram.percent
+
+    disk = psutil.disk_usage('/')
+    total_disk = convert_size(disk.total)
+    disk_usage = convert_size(disk.used)
+    disk_usage_percent = disk.percent
+
+    sys_info_fmt = f"{sys_name} \n"
+    sys_info_fmt += f"\nTotal CPU: {total_cpu}\n"
+    sys_info_fmt += f"CPU Usage (overall): {cpu_usage_overall}%\n"
+    sys_info_fmt += "CPU Usage (per CPU):\n"
+    for cpu_num in range(total_cpu):
+        sys_info_fmt += f"{' ' * 5}- CPU {cpu_num + 1}: {cpu_usage_per_cpu[cpu_num]}% \n"
+    sys_info_fmt += f"\nTotal RAM: {total_ram}\n"
+    sys_info_fmt += f"RAM Usage: {ram_usage} ({ram_usage_percent}%)\n"
+    sys_info_fmt += f"\nTotal Disk: {total_disk}\n"
+    sys_info_fmt += f"Disk Usage: {disk_usage} ({disk_usage_percent}%)\n"
+    return sys_info_fmt
+
+
+def get_speedtest():
+    speedtest = subprocess.run(['speedtest'], stdout=subprocess.PIPE).stdout
+    speedtest_list = speedtest.decode('utf-8').split('\n')
+    speedtest_list_filtered = [s for s in speedtest_list if any(xs in s for xs in ["Hosted by", "Download:", "Upload:"])]
+    speedtest_fmt = "Speedtest result: \n"
+    for idx, slf in enumerate(speedtest_list_filtered):
+        tabs = "" if idx == 0 else f"{' ' * 5}- "
+        speedtest_fmt += f"{tabs}{slf} \n"
+    return speedtest_fmt

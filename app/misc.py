@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 from tabulate import tabulate
 
-from .utils import chunk_list, get_page, Playing, Stations
+from .utils import chunk_list, get_page, Playing, Stations, get_sys_info, get_speedtest
 from .static import (
     RADIO_ID_LOGO_URL, BOT_NAME, BOT_DESC, BOT_GITHUB_URL,
     BOT_TOP_GG_URL, BOT_DBL_URL, BOT_SUPPORT_SERVER_INV,
@@ -53,6 +53,7 @@ class Misc(commands.Cog):
         """
         Show some stats of this bot (owner only)
         """
+
         total_guild = len(self.bot.guilds)
         await ctx.send(f"Added by {total_guild} servers")
 
@@ -107,6 +108,7 @@ class Misc(commands.Cog):
         """
         List of server playing radio and the station
         """
+
         playing = Playing()
 
         await ctx.send(f"Playing on {playing.get_play_count()} servers: ")
@@ -201,3 +203,23 @@ class Misc(commands.Cog):
             stations_fmt += f"• Status for {station_name} is `{station_attr['status']}` {mark}\n"
 
         await ctx.send(stations_fmt)
+
+    @commands.is_owner()
+    @commands.command("htop")
+    async def _htop(self, ctx):
+        """
+        Check machine of hosted bot information
+        """
+
+        init_msg = await ctx.send("Getting info from machine ...")
+        await init_msg.edit(content=f"```{get_sys_info()}```")
+
+    @commands.is_owner()
+    @commands.command("speedtest")
+    async def _speedtest(self, ctx):
+        """
+        Run speedtest command on host machine
+        """
+
+        init_msg = await ctx.send("Running long task ...")
+        await init_msg.edit(content=f"```{get_speedtest()}```")
