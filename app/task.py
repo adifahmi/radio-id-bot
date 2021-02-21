@@ -17,7 +17,6 @@ class BotTask(commands.Cog):
     @tasks.loop(hours=3)
     async def post_server_cnt(self):
         if os.environ.get("ENVIRONMENT") == "dev":
-            print("Skip post_server_cnt")
             return
 
         channel = self.bot.get_channel(RADIOID_SERVER_CHANNEL_ID)
@@ -39,7 +38,6 @@ class BotTask(commands.Cog):
     @tasks.loop(minutes=50)
     async def update_station_stat(self):
         if os.environ.get("ENVIRONMENT") == "dev":
-            print("Skip update_station_stat")
             return
 
         channel = self.bot.get_channel(RADIOID_SERVER_CHANNEL_ID)
@@ -57,6 +55,9 @@ class BotTask(commands.Cog):
 
     @tasks.loop(minutes=55)
     async def whos_playing(self):
+        if os.environ.get("ENVIRONMENT") == "dev":
+            return
+
         channel = self.bot.get_channel(RADIOID_SERVER_CHANNEL_ID)
         playing = Playing()
 
