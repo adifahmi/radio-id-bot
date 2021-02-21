@@ -2,6 +2,7 @@ import asyncio
 import discord
 
 from discord.ext import commands
+from concurrent.futures import ThreadPoolExecutor
 from tabulate import tabulate
 
 from .utils import chunk_list, get_page, Playing, Stations, get_sys_info, get_speedtest
@@ -190,19 +191,24 @@ class Misc(commands.Cog):
         Periksa URL stream stasiun radio
         """
 
-        await ctx.send("Memeriksa stasiun radio ...")
+        init_msg = await ctx.send("Memeriksa stasiun radio ...")
 
         station = Stations()
-        station.update_station_status()
+        s_dict = station.stations
+        for idx, (station_name, station_attr) in enumerate(s_dict.items()):
+            await init_msg.edit(content=f"Memeriksa stasiun radio ({idx}/{len(s_dict)})")
+            url = station_attr["url"]
+            stat = station.check_station_url(url)
+            station.stations[station_name]["status"] = stat
         stations_dict = station.get_stations()
 
         # String fomatting
         stations_fmt = ""
         for station_name, station_attr in stations_dict.items():
-            mark = ":white_check_mark:" if station_attr["status"] == 200 else ":x:"
+            mark = "✅" if station_attr["status"] == 200 else "❌"
             stations_fmt += f"• Status for {station_name} is `{station_attr['status']}` {mark}\n"
 
-        await ctx.send(stations_fmt)
+        await ctx.send(f"Station url info: ```{stations_fmt}```")
 
     @commands.is_owner()
     @commands.command("htop")
@@ -212,7 +218,9 @@ class Misc(commands.Cog):
         """
 
         init_msg = await ctx.send("Getting info from machine ...")
-        await init_msg.edit(content=f"```{get_sys_info()}```")
+        loop = asyncio.get_event_loop()
+        s_info = await loop.run_in_executor(ThreadPoolExecutor(), get_sys_info)
+        await init_msg.edit(content=f"```{s_info}```")
 
     @commands.is_owner()
     @commands.command("speedtest")
@@ -220,6 +228,7 @@ class Misc(commands.Cog):
         """
         Run speedtest command on host machine
         """
-
-        init_msg = await ctx.send("Running long task ...")
-        await init_msg.edit(content=f"```{get_speedtest()}```")
+        init_msg = await ctx.send("Running speedtest ...")
+        loop = asyncio.get_event_loop()
+        s_test = await loop.run_in_executor(ThreadPoolExecutor(), get_speedtest)
+        await init_msg.edit(content=f"```{s_test}```")
