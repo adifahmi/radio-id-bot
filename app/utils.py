@@ -255,6 +255,29 @@ def split_to_columns(text):
     return column_text
 
 
+def split_to_list(text: str, max_len: int = 1000):
+    spllited_text = []
+    if len(text) >= max_len:
+        remain_text = text
+        while True:
+            split_by_new_line = remain_text.split("\n")
+            app_text = ""
+            for new_line_text in split_by_new_line:
+                new_line_text = new_line_text + "\n"
+                if len(app_text) + len(new_line_text) >= max_len:
+                    break
+                app_text += new_line_text
+
+            spllited_text.append(app_text)
+            remain_text = remain_text[len(app_text):]
+
+            if remain_text == "":
+                break
+    else:
+        spllited_text = [text]
+    return spllited_text
+
+
 def convert_size(size_bytes):
     if size_bytes == 0:
         return "0B"
@@ -326,12 +349,6 @@ def run_speedtest():
 
 
 def run_ping(url, times=4):
-    try:
-        times = int(times)
-    except ValueError:
-        return "input_error"
-    if times > 50:
-        times = 50
     cmd = f"ping -c {str(times)} {url}"
     _, output = run_cmd(cmd)
     return output

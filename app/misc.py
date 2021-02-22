@@ -8,7 +8,7 @@ from tabulate import tabulate
 
 from .utils import (
     chunk_list, get_page, Playing, Stations, run_sys_info,
-    run_speedtest, run_ping
+    run_speedtest, run_ping, split_to_list
 )
 from .static import (
     RADIO_ID_LOGO_URL, BOT_NAME, BOT_DESC, BOT_GITHUB_URL,
@@ -244,9 +244,18 @@ class Misc(commands.Cog):
         Run ping command on host machine to custom host
         """
 
-        init_msg = await ctx.send(f"Start pinging to {host} {times} times ...")
+        try:
+            times = int(times)
+        except ValueError:
+            await ctx.send("Fix your ping command, eg: ping google.com 4")
+            return
+
+        if times > 50:
+            times = 50
+
+        await ctx.send(f"Start pinging to {host} {times} times ...")
         loop = asyncio.get_event_loop()
         s_ping = await loop.run_in_executor(ThreadPoolExecutor(), functools.partial(run_ping, host, times))
-        if s_ping == "input_error":
-            s_ping = "Fix your ping command, eg: ping google.com 4"
-        await init_msg.edit(content=f"```{s_ping}```")
+        s_ping = split_to_list(s_ping, 1990)
+        for m in s_ping:
+            await ctx.send(f"```{m}```")
