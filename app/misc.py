@@ -1,11 +1,15 @@
 import asyncio
 import discord
+import functools
 
 from discord.ext import commands
 from concurrent.futures import ThreadPoolExecutor
 from tabulate import tabulate
 
-from .utils import chunk_list, get_page, Playing, Stations, get_sys_info, get_speedtest
+from .utils import (
+    chunk_list, get_page, Playing, Stations, run_sys_info,
+    run_speedtest, run_ping
+)
 from .static import (
     RADIO_ID_LOGO_URL, BOT_NAME, BOT_DESC, BOT_GITHUB_URL,
     BOT_TOP_GG_URL, BOT_DBL_URL, BOT_SUPPORT_SERVER_INV,
@@ -219,7 +223,7 @@ class Misc(commands.Cog):
 
         init_msg = await ctx.send("Getting info from machine ...")
         loop = asyncio.get_event_loop()
-        s_info = await loop.run_in_executor(ThreadPoolExecutor(), get_sys_info)
+        s_info = await loop.run_in_executor(ThreadPoolExecutor(), run_sys_info)
         await init_msg.edit(content=f"```{s_info}```")
 
     @commands.is_owner()
@@ -230,5 +234,19 @@ class Misc(commands.Cog):
         """
         init_msg = await ctx.send("Running speedtest ...")
         loop = asyncio.get_event_loop()
-        s_test = await loop.run_in_executor(ThreadPoolExecutor(), get_speedtest)
+        s_test = await loop.run_in_executor(ThreadPoolExecutor(), run_speedtest)
         await init_msg.edit(content=f"```{s_test}```")
+
+    @commands.is_owner()
+    @commands.command("ping-to")
+    async def _ping_to(self, ctx, host, times):
+        """
+        Run ping command on host machine to custom host
+        """
+
+        init_msg = await ctx.send(f"Start pinging to {host} {times} times ...")
+        loop = asyncio.get_event_loop()
+        s_ping = await loop.run_in_executor(ThreadPoolExecutor(), functools.partial(run_ping, host, times))
+        if s_ping == "input_error":
+            s_ping = "Fix your ping command, eg: ping google.com 4"
+        await init_msg.edit(content=f"```{s_ping}```")

@@ -265,7 +265,7 @@ def convert_size(size_bytes):
     return "%s %s" % (s, size_name[i])
 
 
-def get_sys_info():
+def run_sys_info():
     sys_name = f"{platform.system()} - {platform.release()} ({platform.dist()[0]} {platform.dist()[1]} {platform.dist()[2]})"
 
     total_cpu = psutil.cpu_count()
@@ -286,21 +286,52 @@ def get_sys_info():
     sys_info_fmt += f"\nTotal CPU: {total_cpu}\n"
     sys_info_fmt += f"CPU Usage (overall): {cpu_usage_overall}%\n"
     sys_info_fmt += "CPU Usage (per CPU):\n"
+    per_cpu_info = ""
     for cpu_num in range(total_cpu):
-        sys_info_fmt += f"{' ' * 5}- CPU {cpu_num + 1}: {cpu_usage_per_cpu[cpu_num]}% \n"
-    sys_info_fmt += f"\nTotal RAM: {total_ram}\n"
+        new_line = "" if cpu_num == 0 else "\n"
+        per_cpu_info += f"{new_line}{' ' * 3}- CPU {cpu_num + 1}: {cpu_usage_per_cpu[cpu_num]}%"
+    per_cpu_info = split_to_columns(per_cpu_info)
+    sys_info_fmt += per_cpu_info
+    sys_info_fmt += f"\n\nTotal RAM: {total_ram}\n"
     sys_info_fmt += f"RAM Usage: {ram_usage} ({ram_usage_percent}%)\n"
     sys_info_fmt += f"\nTotal Disk: {total_disk}\n"
     sys_info_fmt += f"Disk Usage: {disk_usage} ({disk_usage_percent}%)\n"
     return sys_info_fmt
 
 
-def get_speedtest():
-    speedtest = subprocess.run(['speedtest'], stdout=subprocess.PIPE).stdout
-    speedtest_list = speedtest.decode('utf-8').split('\n')
+def run_cmd(cmd):
+    print(f"Init run cmd: `{cmd}`")
+    try:
+        cmd_list = cmd.split(" ")
+        run = subprocess.run(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        run_err = run.stderr.decode('utf-8')
+        if run_err != "":
+            return False, run_err
+        return True, run.stdout.decode('utf-8')
+    except Exception as err:
+        return False, str(err)
+
+
+def run_speedtest():
+    status, output = run_cmd('speedtest')
+    if status is False:
+        return output
+    speedtest_list = output.split('\n')
     speedtest_list_filtered = [s for s in speedtest_list if any(xs in s for xs in ["Hosted by", "Download:", "Upload:"])]
     speedtest_fmt = "Speedtest result: \n"
     for idx, slf in enumerate(speedtest_list_filtered):
         tabs = "" if idx == 0 else f"{' ' * 5}- "
         speedtest_fmt += f"{tabs}{slf} \n"
     return speedtest_fmt
+
+
+def run_ping(url, times=4):
+    try:
+        times = int(times)
+    except ValueError:
+        return "input_error"
+    if times > 50:
+        times = 50
+    cmd = f"ping -c {str(times)} {url}"
+    _, output = run_cmd(cmd)
+    return output
