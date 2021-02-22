@@ -58,6 +58,7 @@ async def on_command_error(ctx, error):
         return
 
     if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send("MissingRequiredArgument")
         return
 
     if isinstance(error, commands.NoPrivateMessage):
