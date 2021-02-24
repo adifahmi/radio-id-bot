@@ -1,5 +1,7 @@
+import asyncio
 import os
 
+from concurrent.futures import ThreadPoolExecutor
 from discord.ext import commands, tasks
 from .external_api.dbl import post_bot_server_count
 from .static import RADIOID_SERVER_CHANNEL_ID, RADIOID_BOT_ID
@@ -43,7 +45,8 @@ class BotTask(commands.Cog):
         channel = self.bot.get_channel(RADIOID_SERVER_CHANNEL_ID)
 
         station = Stations()
-        stat_info_dict = station.update_station_status()
+        loop = asyncio.get_event_loop()
+        stat_info_dict = await loop.run_in_executor(ThreadPoolExecutor(), station.update_station_status)
         stats_fmt = ""
         for k, v in stat_info_dict.items():
             stats_fmt += f"• {k}: {v}\n"
