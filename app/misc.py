@@ -215,7 +215,7 @@ class Misc(commands.Cog):
         await ctx.send(f"Station url info: ```{stations_fmt}```")
 
     @commands.is_owner()
-    @commands.command("htop")
+    @commands.command("htop", hidden=True)
     async def _htop(self, ctx):
         """
         Get host machine name, cpu, cpu usage, ram and ram usage
@@ -227,7 +227,7 @@ class Misc(commands.Cog):
         await init_msg.edit(content=f"```{s_info}```")
 
     @commands.is_owner()
-    @commands.command("speedtest")
+    @commands.command("speedtest", hidden=True)
     async def _speedtest(self, ctx):
         """
         Run speedtest command on host machine
@@ -238,7 +238,7 @@ class Misc(commands.Cog):
         await init_msg.edit(content=f"```{s_test}```")
 
     @commands.is_owner()
-    @commands.command("ping-to")
+    @commands.command("ping-to", hidden=True)
     async def _ping_to(self, ctx, host, times):
         """
         Run ping command on host machine to custom host
