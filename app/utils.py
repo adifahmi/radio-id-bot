@@ -340,9 +340,9 @@ def run_speedtest():
     if status is False:
         return output
     speedtest_list = output.split('\n')
-    speedtest_list_filtered = [s for s in speedtest_list if any(xs in s for xs in ["Hosted by", "Download:", "Upload:"])]
+    # speedtest_list = [s for s in speedtest_list if any(xs in s for xs in ["Hosted by", "Download:", "Upload:"])]
     speedtest_fmt = "Speedtest result: \n"
-    for idx, slf in enumerate(speedtest_list_filtered):
+    for idx, slf in enumerate(speedtest_list):
         tabs = "" if idx == 0 else f"{' ' * 5}- "
         speedtest_fmt += f"{tabs}{slf} \n"
     return speedtest_fmt
