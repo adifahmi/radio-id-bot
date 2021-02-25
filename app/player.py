@@ -149,24 +149,25 @@ class RadioPlayer(commands.Cog):
 
             already_promote = False
 
-            # Handle lonely bot
-            # if bot is alone in voice channel, it will stop the radio and leave
+            # will keep looping until bot disconnected from VC
             while True:
-                await asyncio.sleep(30)
+                await asyncio.sleep(3)
                 if vc.is_playing():
-
                     # send promo message one at a times in a session
                     if already_promote is False:
                         await ctx.send(f"Tahukan kamu? sekarang kamu bisa bantu donasi untuk pengembangan bot ini melalui link saweria di `{self.prefix} donate` :innocent:")
                     already_promote = True
 
                     await asyncio.sleep(5)
+                    # if bot is alone in voice channel, it will stop the radio and leave
                     if len(channel.voice_states) < 2:
-                        await ctx.send(f"Voice Channel **{channel}** kosong, radio akan berhenti dalam 3 detik ...")
-                        await asyncio.sleep(3)
-                        await vc.disconnect()
-                        self.playing.remove_from_play(ctx.guild.id)
-                        break
+                        await ctx.send(f"Voice Channel **{channel}** kosong, radio akan berhenti dalam 10 detik ...")
+                        await asyncio.sleep(10)
+                        if len(channel.voice_states) < 2:
+                            await ctx.send(f"Radio berhenti karena ditinggal sendiri di **{channel}**")
+                            await vc.disconnect()
+                            self.playing.remove_from_play(ctx.guild.id)
+                            break
                 else:
                     break
 
@@ -183,11 +184,11 @@ class RadioPlayer(commands.Cog):
         vc = ctx.voice_client
 
         if not vc:
-            await ctx.send("Radio tidak memutar apapun di server ini")
+            await ctx.send("Radio sedang tidak memutar apapun di server ini")
             return
 
         if vc.is_playing() is False:
-            await ctx.send("Radio tidak memutar apapun di server ini")
+            await ctx.send("Radio sedang tidak memutar apapun di server ini")
             return
 
         np = self.playing.current_play(ctx.guild.id)
@@ -208,13 +209,13 @@ class RadioPlayer(commands.Cog):
             return
 
         if vc.is_playing() is False:
-            await ctx.send("Radio tidak memutar apapun")
+            await ctx.send("Radio sedang tidak memutar apapun di server ini")
             return
 
-        await ctx.send("Berhenti ...")
+        await ctx.send("Radio akan berhenti sesaat lagi ...")
+        await asyncio.sleep(2)
         vc.stop()
         self.playing.remove_from_play(ctx.guild.id)
-        await asyncio.sleep(3)
 
     @commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
     @commands.guild_only()
@@ -230,7 +231,10 @@ class RadioPlayer(commands.Cog):
             await ctx.send("Radio tidak berada di Voice Channel")
             return
 
+        if vc.is_playing() is True:
+            await ctx.send(f"Radio sedang memutar stasiun radio, ketik `{self.prefix} stop` untuk menghentikan pemutaran terlebih dahulu.")
+            return
+
         await vc.disconnect()
         self.playing.remove_from_play(ctx.guild.id)
-        await asyncio.sleep(2)
         await ctx.send("Radio keluar dari Voice Channel")
