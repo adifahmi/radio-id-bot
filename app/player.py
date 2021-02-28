@@ -151,9 +151,9 @@ class RadioPlayer(commands.Cog):
 
             # will keep looping until bot disconnected from VC
             while True:
-                await asyncio.sleep(3)
+                await asyncio.sleep(30)
                 if vc.is_playing():
-                    # send promo message one at a times in a session
+                    # send promo message once at a time in a session
                     if already_promote is False:
                         await ctx.send(f"Tahukan kamu? sekarang kamu bisa bantu donasi untuk pengembangan bot ini melalui link saweria di `{self.prefix} donate` :innocent:")
                     already_promote = True
