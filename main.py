@@ -7,6 +7,7 @@ from app.player import RadioPlayer
 from app.extras import Extras
 from app.misc import Misc
 from app.task import BotTask
+from app.static import COMMANDS
 
 load_dotenv()
 
@@ -20,12 +21,11 @@ if TOKEN is None:
     print("CONFIG ERROR: Please state your discord bot token in .env")
     exit()
 
-
-help_command = commands.DefaultHelpCommand(
-    no_category='Basic'
+bot = commands.Bot(
+    command_prefix=f"{PREFIX} ",
+    description="Discord bot untuk memainkan radio favoritmu!",
+    help_command=None
 )
-
-bot = commands.Bot(command_prefix=f"{PREFIX} ", description="Discord bot untuk memainkan radio favoritmu!", help_command=help_command)
 
 
 @bot.event
@@ -33,6 +33,23 @@ async def on_ready():
     print(f"{bot.user.name} has connected to Discord!")
     print(f"Currently added by {len(bot.guilds)} servers")
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=f"`{PREFIX} help` untuk memulai."))
+
+
+@bot.command('help')
+async def _help(ctx):
+    """
+    List of commands
+    """
+
+    embed = discord.Embed(
+        title="Daftar perintah yang tersedia",
+        color=0x9395a5
+    )
+
+    for cmd, msg in COMMANDS.items():
+        embed.add_field(name=f"{PREFIX} {cmd}", value=msg, inline=False)
+        embed.set_footer(text="radio-id")
+    await ctx.send(embed=embed)
 
 
 @bot.event

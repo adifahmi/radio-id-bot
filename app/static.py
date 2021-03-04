@@ -18,3 +18,19 @@ RADIOID_BOT_ID = 777757482687922198  # This bot ID
 RADIO_ID_LOGO_URL = "https://cdn.discordapp.com/attachments/781466869688827904/800918212816535552/radio-free-license-400.png"
 SAWERIA_LOGO_URL = "https://cdn.discordapp.com/attachments/781466869688827904/800926776176017429/saweria2.png"
 DONATE_IMAGE_URL = "https://cdn.discordapp.com/attachments/781466869688827904/817045118296391770/donate-resize.png"
+
+COMMANDS = {
+    "help": "Menampilkan pesan ini",
+    "play <stasiun-radio>": "Memainkan radio berdasarkan input user",
+    "list": "Menampilkan daftar stasiun radio yang tersedia",
+    "join <optional: channel-name>": "Menghubungkan bot ke Voice Channel",
+    "stop": "Menghentikan permainan radio",
+    "playing": "Menampilkan stasiun radio yang sedang diputar",
+    "leave": "Memutuskan bot dari Voice Channel",
+    "donate": "Info tentang cara berdonasi untuk biaya server dan pengembagan bot ini",
+    "about": "Deskripsi tentang bot ini",
+    "ping": "Latensi bot ke server discord",
+    "lyrics <artis atau judul lagu>": "Menampilkan lyric berdasarkan input user",
+    "station-check": "Periksa URL stream stasiun radio",
+    "support": "Link ke support discord server",
+}
