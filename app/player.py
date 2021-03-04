@@ -141,7 +141,7 @@ class RadioPlayer(commands.Cog):
                 return
 
             try:
-                vc.play(discord.FFmpegPCMAudio(source), after=_vc_end)
+                vc.play(discord.FFmpegOpusAudio(source), after=_vc_end)
                 self.playing.add_to_play(ctx.guild.id, ctx.guild.name, station)  # Add to NP
             except Exception as e:
                 print(f"Error playing {station} | {e}")
