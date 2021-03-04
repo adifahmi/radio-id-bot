@@ -14,7 +14,7 @@ from .static import (
     RADIO_ID_LOGO_URL, BOT_NAME, BOT_DESC, BOT_GITHUB_URL,
     BOT_TOP_GG_URL, BOT_DBL_URL, BOT_SUPPORT_SERVER_INV,
     AUTHOR_NAME, AUTHOR_TWITTER_URL, AUTHOR_ICON_URL,
-    SAWERIA_URL, SAWERIA_LOGO_URL
+    SAWERIA_URL, DONATE_IMAGE_URL, PAYPAL_URL
 )
 
 
@@ -173,18 +173,19 @@ class Misc(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command("donate")
-    async def _donasi(self, ctx):
+    async def _donate(self, ctx):
         """
         Link donasi untuk pengembangan bot ini
         """
 
         embed = discord.Embed(
-            title="Saweria",
-            url=SAWERIA_URL,
-            description="Dukung pengembangan bot ini dengan cara berdonasi melalui saweria",
+            title="Donasi",
+            description="Dukung pengembangan dan biaya hosting bot ini dengan cara berdonasi melalui saweria atau paypal",
             color=0x9395a5
         )
-        embed.set_thumbnail(url=SAWERIA_LOGO_URL)
+        embed.add_field(name="Saweria", value=f"[{SAWERIA_URL}]({SAWERIA_URL})", inline=False)
+        embed.add_field(name="Paypal", value=f"[{PAYPAL_URL}]({PAYPAL_URL})", inline=False)
+        embed.set_thumbnail(url=DONATE_IMAGE_URL)
         embed.set_footer(text="radio-id")
         await ctx.send(embed=embed)
 
