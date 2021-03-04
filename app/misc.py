@@ -201,7 +201,7 @@ class Misc(commands.Cog):
         station = Stations()
         s_dict = station.stations
         for idx, (station_name, station_attr) in enumerate(s_dict.items()):
-            await init_msg.edit(content=f"Memeriksa stasiun radio ({idx}/{len(s_dict)})")
+            await init_msg.edit(content=f"Memeriksa stasiun radio ({idx + 1}/{len(s_dict)})")
             url = station_attr["url"]
             stat = station.check_station_url(url)
             station.stations[station_name]["status"] = stat
@@ -216,7 +216,7 @@ class Misc(commands.Cog):
         await ctx.send(f"Station url info: ```{stations_fmt}```")
 
     @commands.is_owner()
-    @commands.command("htop")
+    @commands.command("htop", hidden=True)
     async def _htop(self, ctx):
         """
         Get host machine name, cpu, cpu usage, ram and ram usage
@@ -228,7 +228,7 @@ class Misc(commands.Cog):
         await init_msg.edit(content=f"```{s_info}```")
 
     @commands.is_owner()
-    @commands.command("speedtest")
+    @commands.command("speedtest", hidden=True)
     async def _speedtest(self, ctx):
         """
         Run speedtest command on host machine
@@ -239,7 +239,7 @@ class Misc(commands.Cog):
         await init_msg.edit(content=f"```{s_test}```")
 
     @commands.is_owner()
-    @commands.command("ping-to")
+    @commands.command("ping-to", hidden=True)
     async def _ping_to(self, ctx, host, times):
         """
         Run ping command on host machine to custom host
