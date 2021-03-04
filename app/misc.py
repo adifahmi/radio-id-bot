@@ -109,7 +109,7 @@ class Misc(commands.Cog):
 
     @commands.is_owner()
     @commands.command("np", hidden=True)
-    async def _np(self, ctx):
+    async def _np(self, ctx, details=None):
         """
         List of server playing radio and the station
         """
@@ -117,8 +117,10 @@ class Misc(commands.Cog):
         playing = Playing()
 
         await ctx.send(f"Playing on {playing.get_play_count()} servers: ")
-        for _, np in playing.get_all_play().items():
-            await ctx.send(f"• Playing **{np['station']}** on **{np['guild_name']}**\n")
+
+        if details == "list":
+            for _, np in playing.get_all_play().items():
+                await ctx.send(f"• Playing **{np['station']}** on **{np['guild_name']}**\n")
         return
 
     @commands.guild_only()
