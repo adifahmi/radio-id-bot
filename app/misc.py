@@ -153,7 +153,7 @@ class Misc(commands.Cog):
         embed.set_thumbnail(url=RADIO_ID_LOGO_URL)
 
         embed.add_field(name="Open source code", value=f"[Github]({BOT_GITHUB_URL})", inline=False)
-        embed.add_field(name="Donasi", value=f"[Saweria]({SAWERIA_URL})", inline=False)
+        embed.add_field(name="Donasi", value=f"[Saweria]({SAWERIA_URL}), [Paypal]({PAYPAL_URL})", inline=False)
         embed.add_field(name="Vote this bot", value=f"[top.gg]({BOT_TOP_GG_URL}), [DBL]({BOT_DBL_URL})", inline=False)
         embed.add_field(name="Support server", value=f"[AF Home]({BOT_SUPPORT_SERVER_INV})", inline=False)
         embed.set_footer(text="radio-id")
