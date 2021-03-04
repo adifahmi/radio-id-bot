@@ -200,7 +200,7 @@ class Misc(commands.Cog):
         station = Stations()
         s_dict = station.stations
         for idx, (station_name, station_attr) in enumerate(s_dict.items()):
-            await init_msg.edit(content=f"Memeriksa stasiun radio ({idx}/{len(s_dict)})")
+            await init_msg.edit(content=f"Memeriksa stasiun radio ({idx + 1}/{len(s_dict)})")
             url = station_attr["url"]
             stat = station.check_station_url(url)
             station.stations[station_name]["status"] = stat
