@@ -42,13 +42,14 @@ async def _help(ctx):
     """
 
     embed = discord.Embed(
-        title="Daftar perintah yang tersedia",
+        title="Daftar perintah yang tersedia:",
         color=0x9395a5
     )
 
     for cmd, msg in COMMANDS.items():
-        embed.add_field(name=f"{PREFIX} {cmd}", value=msg, inline=False)
-        embed.set_footer(text="radio-id")
+        embed.add_field(name=f"{PREFIX} {cmd}", value=f"{msg} \n \u200b", inline=True)
+
+    embed.set_footer(text="radio-id")
     await ctx.send(embed=embed)
 
 
