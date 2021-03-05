@@ -116,7 +116,7 @@ class Misc(commands.Cog):
 
         playing = Playing()
 
-        await ctx.send(f"Playing on {playing.get_play_count()} servers: ")
+        await ctx.send(f"Playing on {playing.get_play_count()} servers")
 
         if details == "list":
             for _, np in playing.get_all_play().items():
