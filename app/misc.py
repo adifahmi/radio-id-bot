@@ -119,7 +119,8 @@ class Misc(commands.Cog):
         await ctx.send(f"Playing on {playing.get_play_count()} servers")
 
         if details == "list":
-            for _, np in playing.get_all_play().items():
+            all_play = playing.get_all_play().copy()
+            for _, np in all_play.items():
                 await ctx.send(f"• Playing **{np['station']}** on **{np['guild_name']}**\n")
         return
 

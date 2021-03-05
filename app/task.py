@@ -65,7 +65,8 @@ class BotTask(commands.Cog):
         playing = Playing()
 
         playing_fmt = ""
-        for _, v in playing.get_all_play().items():
+        all_play = playing.get_all_play().copy()
+        for _, v in all_play.items():
             playing_fmt += f"• {v['guild_name']}: {v['station']}\n"
 
         if playing_fmt == "":
