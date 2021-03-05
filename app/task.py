@@ -1,10 +1,10 @@
 import asyncio
+import dbl
 import os
 
 from concurrent.futures import ThreadPoolExecutor
 from discord.ext import commands, tasks
-from .external_api.dbl import post_bot_server_count
-from .static import RADIOID_SERVER_CHANNEL_ID, RADIOID_BOT_ID
+from .static import RADIOID_SERVER_CHANNEL_ID
 from .utils import Stations, Playing, get_emoji_by_number
 
 
@@ -12,6 +12,8 @@ class BotTask(commands.Cog):
     def __init__(self, bot, prefix):
         self.bot = bot
         self.prefix = prefix
+        self.token = os.getenv("DBL_TOKEN")  # set this to your DBL token
+        self.dblpy = dbl.DBLClient(self.bot, self.token)
         self.post_server_cnt.start()
         self.update_station_stat.start()
         self.whos_playing.start()
@@ -22,14 +24,10 @@ class BotTask(commands.Cog):
             return
 
         channel = self.bot.get_channel(RADIOID_SERVER_CHANNEL_ID)
-        total_guild_add = len(self.bot.guilds)
-        await channel.send(f"Bot added by: {get_emoji_by_number(total_guild_add)} servers")
+
         try:
-            res, info = post_bot_server_count(RADIOID_BOT_ID, total_guild_add)
-            if res is None:
-                await channel.send(f"Failed to update bot server count\n```{info}```")
-            else:
-                await channel.send(f"Success update bot server count\n```{info}```")
+            await self.dblpy.post_guild_count()
+            await channel.send(f"Bot added by: {get_emoji_by_number(self.dblpy.guild_count())} servers")
         except Exception as e:
             await channel.send(f"Failed to update bot server count\n```{e}```")
 
