@@ -30,7 +30,7 @@ COMMANDS = {
     "donate": "Info tentang cara berdonasi untuk biaya server dan pengembagan bot ini",
     "about": "Deskripsi tentang bot ini",
     "ping": "Latensi bot ke server discord",
-    "lyrics <artis atau judul lagu>": "Menampilkan lyric berdasarkan input user",
+    "lyrics <artis atau judul lagu>": "Menampilkan lyrics lagu berdasarkan input user",
     "station-check": "Periksa URL stream stasiun radio",
     "support": "Link ke support discord server",
 }

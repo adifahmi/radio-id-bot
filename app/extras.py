@@ -14,10 +14,10 @@ class Extras(commands.Cog):
     @commands.command("lyrics")
     async def _lyrics(self, ctx, *query):
         """
-        Menampilkan lyric berdasarkan input
+        Menampilkan lyrics lagu berdasarkan input
         """
         if not query:
-            await ctx.send(f"Silahkan masukan judul lagi terlebih dahulu, contoh: `{self.prefix} lyrics Paramore Still Into You`")
+            await ctx.send(f"Silahkan masukan artis dan judul lagu terlebih dahulu, contoh: `{self.prefix} lyrics Paramore Still into you`")
             return
         else:
             query = " ".join(query[:])
