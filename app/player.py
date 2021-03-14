@@ -213,7 +213,6 @@ class RadioPlayer(commands.Cog):
             return
 
         await ctx.send("Menghentikan radio ...")
-        await asyncio.sleep(2)
         vc.stop()
         self.playing.remove_from_play(ctx.guild.id)
 
