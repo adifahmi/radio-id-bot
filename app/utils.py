@@ -151,16 +151,21 @@ def chunk_list(seq, num):
 
 
 class DummyGuilds:
-    def __init__(self, name, member_count):
+    def __init__(self, id, name, member_count):
+        self.id = id
         self.name = name
         self.member_count = member_count
+
+    def __repr__(self):
+        return f"Guild(id={self.id}, name={self.name}, member_count={self.member_count})"
 
 
 def dummy_guilds(n=10):
     guilds = []
-    for _ in range(n):
+    for i in range(n):
         guilds.append(
             DummyGuilds(
+                i,
                 generate_random_string(random.randint(5, 10)),
                 random.randint(10, 1000)
             )

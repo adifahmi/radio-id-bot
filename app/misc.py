@@ -1,6 +1,7 @@
 import asyncio
 import discord
 import functools
+import datetime
 
 from discord.ext import commands
 from concurrent.futures import ThreadPoolExecutor
@@ -16,6 +17,7 @@ from .static import (
     AUTHOR_NAME, AUTHOR_TWITTER_URL, AUTHOR_ICON_URL,
     SAWERIA_URL, DONATE_IMAGE_URL, PAYPAL_URL
 )
+from .external_api.pastebin import post_new_paste
 
 
 class Misc(commands.Cog):
@@ -59,11 +61,15 @@ class Misc(commands.Cog):
         Show some stats of this bot (owner only)
         """
 
-        total_guild = len(self.bot.guilds)
+        guild_obj = self.bot.guilds
+        total_guild = len(guild_obj)
+        chunk_guild = chunk_list(guild_obj, total_guild / 15)
+
+        # data to post to pastebin
+        fmt_full_report = f"Added by {total_guild} servers\n\n"
+        fmt_full_report += "id,name,member_cnt,guild_id\n"
+
         await ctx.send(f"Added by {total_guild} servers")
-
-        chunk_guild = chunk_list(self.bot.guilds, total_guild / 15)
-
         await ctx.send("List of servers:")
         total_member = 0
         num = 1
@@ -72,6 +78,7 @@ class Misc(commands.Cog):
         for guilds in chunk_guild:
             guild_list = []
             for guild in guilds:
+                fmt_full_report += f"{num},{guild.name},{guild.member_count},{guild.id}\n"
                 guild_list.append([num, guild.name, guild.member_count])
                 total_member += guild.member_count
                 num += 1
@@ -86,6 +93,16 @@ class Misc(commands.Cog):
         await self.page_reaction(msg, total_page, current_page)
 
         await ctx.send(f"Total members: {total_member}")
+        fmt_full_report += f"\nTotal members: {total_member}"
+        now = datetime.datetime.now().strftime("%Y/%m/%d-%H:%M")
+
+        pastebin_url, _ = post_new_paste(
+            text=fmt_full_report,
+            filename=f"RadioID_{now}.csv",
+            visibility=1,
+            expire="1D"
+        )
+        await ctx.send(f"Pastebin: {pastebin_url}")
 
         if total_page > 1:
             while True:
