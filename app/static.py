@@ -12,6 +12,7 @@ BOT_GITHUB_URL = "https://github.com/AdiFahmi/radio-id-bot"
 BOT_TOP_GG_URL = "https://top.gg/bot/777757482687922198"
 BOT_DBL_URL = "https://discordbotlist.com/bots/radio-indonesia"
 BOT_SUPPORT_SERVER_INV = "https://discord.gg/tmY3Jx2THX"
+BOT_INVITE_LINK = "https://discord.com/oauth2/authorize?client_id=777757482687922198&scope=bot&response_type=code"
 
 RADIOID_SERVER_CHANNEL_ID = 787685233301782539  # Default channel ID of this bot support server
 RADIOID_BOT_ID = 777757482687922198  # This bot ID
@@ -33,4 +34,5 @@ COMMANDS = {
     "lyrics <artis atau judul lagu>": "Menampilkan lyrics lagu berdasarkan input user",
     "station-check": "Periksa URL stream stasiun radio",
     "support": "Link ke support discord server",
+    "invite": "Link untuk memasukkan bot ini ke server discord",
 }

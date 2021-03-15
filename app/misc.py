@@ -9,13 +9,14 @@ from tabulate import tabulate
 
 from .utils import (
     chunk_list, get_page, Playing, Stations, run_sys_info,
-    run_speedtest, run_ping, split_to_list
+    run_speedtest, run_ping, split_to_list, run_cmd
 )
 from .static import (
     RADIO_ID_LOGO_URL, BOT_NAME, BOT_DESC, BOT_GITHUB_URL,
     BOT_TOP_GG_URL, BOT_DBL_URL, BOT_SUPPORT_SERVER_INV,
     AUTHOR_NAME, AUTHOR_TWITTER_URL, AUTHOR_ICON_URL,
-    SAWERIA_URL, DONATE_IMAGE_URL, PAYPAL_URL
+    SAWERIA_URL, DONATE_IMAGE_URL, PAYPAL_URL,
+    BOT_INVITE_LINK
 )
 from .external_api.pastebin import post_new_paste
 
@@ -209,6 +210,23 @@ class Misc(commands.Cog):
         embed.set_footer(text="radio-id")
         await ctx.send(embed=embed)
 
+    @commands.command("invite")
+    async def _invite(self, ctx):
+        """
+        Link to invite this bot
+        """
+
+        embed = discord.Embed(
+            title="Invite this bot",
+            description="Link untuk memasukkan bot ini ke server discord",
+            color=0x9395a5
+        )
+        embed.add_field(name="Direct link", value=f"[{BOT_INVITE_LINK}]({BOT_INVITE_LINK})", inline=False)
+        embed.add_field(name="Top gg", value=f"[{BOT_TOP_GG_URL}]({BOT_TOP_GG_URL})", inline=False)
+        embed.set_thumbnail(url=RADIO_ID_LOGO_URL)
+        embed.set_footer(text="radio-id")
+        await ctx.send(embed=embed)
+
     @commands.guild_only()
     @commands.command("station-check")
     async def _check_url(self, ctx):
@@ -253,6 +271,7 @@ class Misc(commands.Cog):
         """
         Run speedtest command on host machine
         """
+
         init_msg = await ctx.send("Running speedtest ...")
         loop = asyncio.get_event_loop()
         s_test = await loop.run_in_executor(ThreadPoolExecutor(), run_speedtest)
@@ -280,3 +299,19 @@ class Misc(commands.Cog):
         s_ping = split_to_list(s_ping, 1990)
         for m in s_ping:
             await ctx.send(f"```{m}```")
+
+    @commands.is_owner()
+    @commands.command("cmd", hidden=True)
+    async def _cmd(self, ctx, *cmd_input):
+        """
+        Run custom command on host machine
+        """
+
+        if not cmd_input:
+            await ctx.send("Empty cmd")
+        cmd_input = " ".join(cmd_input[:])
+
+        await ctx.send(f"Running `{cmd_input}` ...")
+        loop = asyncio.get_event_loop()
+        _, r_cmd = await loop.run_in_executor(ThreadPoolExecutor(), functools.partial(run_cmd, cmd_input))
+        await ctx.send(f"```{r_cmd}```")

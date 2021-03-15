@@ -341,17 +341,8 @@ def run_cmd(cmd):
 
 
 def run_speedtest():
-    status, output = run_cmd('speedtest')
+    _, output = run_cmd('speedtest')
     return output
-    # if status is False:
-    #     return output
-    # speedtest_list = output.split('\n')
-    # speedtest_list = [s for s in speedtest_list if any(xs in s for xs in ["Hosted by", "Download:", "Upload:"])]
-    # speedtest_fmt = "Speedtest result: \n"
-    # for idx, slf in enumerate(speedtest_list):
-    #     tabs = "" if idx == 0 else f"{' ' * 5}- "
-    #     speedtest_fmt += f"{tabs}{slf} \n"
-    # return output
 
 
 def run_ping(url, times=4):
