@@ -1,4 +1,4 @@
 ---
 radio-stations:
-  name-of-stations: http-url-to-stream
+  name-of-stations: https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_5MG.mp3
   another-stations: http-url-to-stream
