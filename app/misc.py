@@ -314,4 +314,6 @@ class Misc(commands.Cog):
         await ctx.send(f"Running `{cmd_input}` ...")
         loop = asyncio.get_event_loop()
         _, r_cmd = await loop.run_in_executor(ThreadPoolExecutor(), functools.partial(run_cmd, cmd_input))
-        await ctx.send(f"```{r_cmd}```")
+        s_r_cmd = split_to_list(r_cmd, 1990)
+        for m in s_r_cmd:
+            await ctx.send(f"```{m}```")
