@@ -18,7 +18,8 @@ def api(api_base, headers=None):
         if region is not None:
             url = api_base() % region + endpoint
         method = method.upper()
-        print(f"START-{method} - {url} | {json.dumps(data)}")
+        data_dump = data.decode("utf-8") if type(data) is bytes else data
+        print(f"START-{method} - {url} | {json.dumps(data_dump)}")
         try:
             if method == 'GET':
                 resp = S.get(url, headers=headers, params=data, timeout=TIMEOUT)

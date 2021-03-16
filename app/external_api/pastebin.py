@@ -21,5 +21,6 @@ def post_new_paste(text: str, filename: str, visibility: int = 1, expire: str = 
     payload += f'&api_paste_private={str(visibility)}'
     payload += f'&api_paste_expire_date={expire}'
     payload += f'&api_paste_code={text}'
+    payload = payload.encode('utf-8')
     result = pastebin_api('post', 'api_post.php', payload, False)
     return result
