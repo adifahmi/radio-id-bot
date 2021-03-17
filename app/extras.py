@@ -3,7 +3,7 @@ import os
 import datetime
 
 from discord.ext import commands
-from .utils import create_tempfile, dummy_guilds
+from .utils import create_tempfile
 from .external_api import ksoft, dbox
 
 
@@ -56,7 +56,6 @@ class Extras(commands.Cog):
         """
 
         guild_obj = self.bot.guilds
-        guild_obj = dummy_guilds(1027)
         total_guild = len(guild_obj)
 
         # prepare csv
