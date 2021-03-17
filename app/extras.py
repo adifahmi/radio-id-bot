@@ -50,30 +50,36 @@ class Extras(commands.Cog):
 
     @commands.is_owner()
     @commands.command("upload_stats", hidden=True)
-    async def _upload_stats(self, ctx):
+    async def _upload_stats(self, ctx, *params):
         """
         Show some stats of this bot (owner only)
         """
+
+        if params is not None:
+            params = " ".join(params[:])
 
         guild_obj = self.bot.guilds
         total_guild = len(guild_obj)
 
         # prepare csv
-        fmt_full_report = f"Added by {total_guild} servers\n\n"
-        fmt_full_report += "id,name,member_cnt,guild_id\n"
-
         await ctx.send("Preparing data ...")
+
+        csv_guilds = ""
         total_member = 0
         num = 1
         for guild in guild_obj:
-            fmt_full_report += f'{num},"{guild.name}",{guild.member_count},{guild.id}\n'
+            csv_guilds += f'{num},"{guild.name}",{guild.member_count},{guild.id}\n'
             total_member += guild.member_count
             num += 1
 
-        fmt_full_report += f"\nTotal members: {total_member}"
-        now = datetime.datetime.now().strftime("%Y-%m-%d-%H:%M")
+        csv_report = f"Added by {total_guild} servers\n"
+        csv_report += f"Total members: {total_member}\n\n"
 
-        file = create_tempfile(fmt_full_report)
+        csv_report += "id,name,member_cnt,guild_id\n"
+        csv_report += csv_guilds
+
+        now = datetime.datetime.now().strftime("%Y-%m-%d-%H:%M")
+        file = create_tempfile(csv_report)
         env = os.environ.get("ENVIRONMENT")
         filename = f"RadioID_{env}_{now}.csv"
 
@@ -82,13 +88,14 @@ class Extras(commands.Cog):
         if ul_info['status_code'] != 200:
             await ctx.send(f"Failed to upload ```{str(ul_info['error'])}```")
             return
+        await ctx.send(f"File uploaded at `{ul.get('path_display')}`")
 
-        await ctx.send(f"File uploaded at `{ul.get('path_display')}`, getting link ...")
-
-        gl, gl_info = dbox.create_share_link(ul.get('path_display'))
-        if gl_info['status_code'] != 200:
-            await ctx.send(f"Failed to get download link ```{str(gl_info['error'])}```")
-        else:
-            await ctx.send(f"Download link: {gl.get('url')}")
+        if params == "with link":
+            await ctx.send("Generating link ...")
+            gl, gl_info = dbox.create_share_link(ul.get('path_display'))
+            if gl_info['status_code'] != 200:
+                await ctx.send(f"Failed to get download link ```{str(gl_info['error'])}```")
+            else:
+                await ctx.send(f"Download link: {gl.get('url')}")
 
         return
