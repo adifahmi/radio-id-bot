@@ -6,6 +6,7 @@ import yaml
 import psutil
 import subprocess
 import platform
+import tempfile
 
 from collections import OrderedDict
 from urllib.request import urlopen
@@ -349,3 +350,14 @@ def run_ping(url, times=4):
     cmd = f"ping -c {str(times)} {url}"
     _, output = run_cmd(cmd)
     return output
+
+
+def create_tempfile(data):
+    fp = tempfile.TemporaryFile()
+    if type(data) is str:
+        data = str.encode(data)
+    fp.write(data)
+    fp.seek(0)
+    file = fp.read()
+    fp.close()
+    return file
