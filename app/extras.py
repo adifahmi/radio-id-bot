@@ -66,7 +66,7 @@ class Extras(commands.Cog):
         total_member = 0
         num = 1
         for guild in guild_obj:
-            fmt_full_report += f"{num},{guild.name},{guild.member_count},{guild.id}\n"
+            fmt_full_report += f'{num},"{guild.name}",{guild.member_count},{guild.id}\n'
             total_member += guild.member_count
             num += 1
 
