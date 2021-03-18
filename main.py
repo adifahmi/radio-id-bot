@@ -47,7 +47,7 @@ async def _help(ctx):
     )
 
     for cmd, msg in COMMANDS.items():
-        embed.add_field(name=f"{PREFIX} {cmd}", value=f"{msg} \n \u200b", inline=True)
+        embed.add_field(name=f"{PREFIX} {cmd}", value=f"{msg} \n \u200b")
 
     embed.set_footer(text="radio-id")
     await ctx.send(embed=embed)
