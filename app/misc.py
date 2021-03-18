@@ -1,22 +1,19 @@
 import asyncio
 import discord
 import functools
+import os
+import datetime
 
 from discord.ext import commands
 from concurrent.futures import ThreadPoolExecutor
 from tabulate import tabulate
 
 from .utils import (
-    chunk_list, get_page, Playing, Stations, run_sys_info,
-    run_speedtest, run_ping, split_to_list, run_cmd
+    chunk_list, get_page, Playing, run_sys_info,
+    run_speedtest, run_ping, split_to_list, run_cmd,
+    create_tempfile
 )
-from .static import (
-    RADIO_ID_LOGO_URL, BOT_NAME, BOT_DESC, BOT_GITHUB_URL,
-    BOT_TOP_GG_URL, BOT_DBL_URL, BOT_SUPPORT_SERVER_INV,
-    AUTHOR_NAME, AUTHOR_TWITTER_URL, AUTHOR_ICON_URL,
-    SAWERIA_URL, DONATE_IMAGE_URL, PAYPAL_URL,
-    BOT_INVITE_LINK
-)
+from .external_api import dbox
 
 
 class Misc(commands.Cog):
@@ -125,117 +122,6 @@ class Misc(commands.Cog):
                 await ctx.send(f"• Playing **{np['station']}** on **{np['guild_name']}**\n")
         return
 
-    @commands.guild_only()
-    @commands.command("ping")
-    async def _ping(self, ctx):
-        """
-        Latensi bot ke server
-        """
-
-        lat = self.bot.latency
-        await ctx.send(f"Latensi bot ke server ~{round(lat, 2)} detik")
-
-    @commands.command("about")
-    async def _about(self, ctx):
-        """
-        Deskripsi tentang bot ini
-        """
-
-        embed = discord.Embed(
-            title=BOT_NAME,
-            url=BOT_GITHUB_URL,
-            description=BOT_DESC,
-            color=0x9395a5
-        )
-        embed.set_author(
-            name=AUTHOR_NAME,
-            url=AUTHOR_TWITTER_URL,
-            icon_url=AUTHOR_ICON_URL
-        )
-        embed.set_thumbnail(url=RADIO_ID_LOGO_URL)
-
-        embed.add_field(name="Open source code", value=f"[Github]({BOT_GITHUB_URL})", inline=False)
-        embed.add_field(name="Donasi", value=f"[Saweria]({SAWERIA_URL}), [Paypal]({PAYPAL_URL})", inline=False)
-        embed.add_field(name="Vote this bot", value=f"[top.gg]({BOT_TOP_GG_URL}), [DBL]({BOT_DBL_URL})", inline=False)
-        embed.add_field(name="Support server", value=f"[AF Home]({BOT_SUPPORT_SERVER_INV})", inline=False)
-        embed.set_footer(text="radio-id")
-        await ctx.send(embed=embed)
-
-    @commands.command("support")
-    async def _support(self, ctx):
-        """
-        Link ke support server radio-id-bot
-        """
-
-        embed = discord.Embed(
-            title="AF Home",
-            url=BOT_SUPPORT_SERVER_INV,
-            description="Join server AF Home untuk memberikan masukan",
-            color=0x9395a5
-        )
-        embed.set_footer(text="radio-id")
-        await ctx.send(embed=embed)
-
-    @commands.command("donate")
-    async def _donate(self, ctx):
-        """
-        Link donasi untuk pengembangan bot ini
-        """
-
-        embed = discord.Embed(
-            title="Donasi",
-            description="Dukung pengembangan dan biaya hosting bot ini dengan cara berdonasi melalui saweria atau paypal",
-            color=0x9395a5
-        )
-        embed.add_field(name="Saweria", value=f"[{SAWERIA_URL}]({SAWERIA_URL})", inline=False)
-        embed.add_field(name="Paypal", value=f"[{PAYPAL_URL}]({PAYPAL_URL})", inline=False)
-        embed.set_thumbnail(url=DONATE_IMAGE_URL)
-        embed.set_footer(text="radio-id")
-        await ctx.send(embed=embed)
-
-    @commands.command("invite")
-    async def _invite(self, ctx):
-        """
-        Link to invite this bot
-        """
-
-        embed = discord.Embed(
-            title="Invite this bot",
-            description="Link untuk memasukkan bot ini ke server discord",
-            color=0x9395a5
-        )
-        embed.add_field(name="Direct link", value=f"[{BOT_INVITE_LINK}]({BOT_INVITE_LINK})", inline=False)
-        embed.add_field(name="Top gg", value=f"[{BOT_TOP_GG_URL}]({BOT_TOP_GG_URL})", inline=False)
-        embed.set_thumbnail(url=RADIO_ID_LOGO_URL)
-        embed.set_footer(text="radio-id")
-        await ctx.send(embed=embed)
-
-    @commands.guild_only()
-    @commands.command("station-check")
-    async def _check_url(self, ctx):
-        """
-        Periksa URL stream stasiun radio
-        """
-
-        init_msg = await ctx.send("Memeriksa stasiun radio ...")
-
-        station = Stations()
-        s_dict = station.stations
-        for idx, (station_name, station_attr) in enumerate(s_dict.items()):
-            await init_msg.edit(content=f"Memeriksa stasiun radio ({idx + 1}/{len(s_dict)})")
-            url = station_attr["url"]
-            stat = station.check_station_url(url)
-            station.stations[station_name]["status"] = stat
-        stations_dict = station.get_stations()
-
-        # String fomatting
-        stations_fmt = ""
-        for station_name, station_attr in stations_dict.items():
-            mark = "✅" if station_attr["status"] == 200 else "❌"
-            stations_fmt += f"• Status for {station_name} is `{station_attr['status']}` {mark}\n"
-
-        await ctx.send(f"Station url info: ```{stations_fmt}```")
-
     @commands.is_owner()
     @commands.command("htop", hidden=True)
     async def _htop(self, ctx):
@@ -300,3 +186,55 @@ class Misc(commands.Cog):
         s_r_cmd = split_to_list(r_cmd, 1990)
         for m in s_r_cmd:
             await ctx.send(f"```{m}```")
+
+    @commands.is_owner()
+    @commands.command("upload_stats", hidden=True)
+    async def _upload_stats(self, ctx, *params):
+        """
+        Show some stats of this bot (owner only)
+        """
+
+        if params is not None:
+            params = " ".join(params[:])
+
+        guild_obj = self.bot.guilds
+        total_guild = len(guild_obj)
+
+        # prepare csv
+        await ctx.send("Preparing data ...")
+
+        csv_guilds = ""
+        total_member = 0
+        num = 1
+        for guild in guild_obj:
+            csv_guilds += f'{num},"{guild.name}",{guild.member_count},{guild.id}\n'
+            total_member += guild.member_count
+            num += 1
+
+        csv_report = f"Added by {total_guild} servers\n"
+        csv_report += f"Total members: {total_member}\n\n"
+
+        csv_report += "id,name,member_cnt,guild_id\n"
+        csv_report += csv_guilds
+
+        now = datetime.datetime.now().strftime("%Y-%m-%d-%H:%M")
+        file = create_tempfile(csv_report)
+        env = os.environ.get("ENVIRONMENT")
+        filename = f"RadioID_{env}_{now}.csv"
+
+        await ctx.send("Uploading stats to dropbox")
+        ul, ul_info = dbox.upload_file(file, filename)
+        if ul_info['status_code'] != 200:
+            await ctx.send(f"Failed to upload ```{str(ul_info['error'])}```")
+            return
+        await ctx.send(f"File uploaded at `{ul.get('path_display')}`")
+
+        if params == "with link":
+            await ctx.send("Generating link ...")
+            gl, gl_info = dbox.create_share_link(ul.get('path_display'))
+            if gl_info['status_code'] != 200:
+                await ctx.send(f"Failed to get download link ```{str(gl_info['error'])}```")
+            else:
+                await ctx.send(f"Download link: {gl.get('url')}")
+
+        return
