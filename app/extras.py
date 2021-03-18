@@ -1,7 +1,6 @@
 import discord
 
 from discord.ext import commands
-from .utils import Stations
 from .external_api import ksoft
 from .static import (
     RADIO_ID_LOGO_URL, BOT_NAME, BOT_DESC, BOT_GITHUB_URL,
@@ -142,31 +141,4 @@ class Extras(commands.Cog):
         embed.set_thumbnail(url=RADIO_ID_LOGO_URL)
         embed.set_footer(text="radio-id")
         await ctx.send(embed=embed)
-        return
-
-    @commands.guild_only()
-    @commands.command("station-check")
-    async def _check_url(self, ctx):
-        """
-        Periksa URL stream stasiun radio
-        """
-
-        init_msg = await ctx.send("Memeriksa stasiun radio ...")
-
-        station = Stations()
-        s_dict = station.stations
-        for idx, (station_name, station_attr) in enumerate(s_dict.items()):
-            await init_msg.edit(content=f"Memeriksa stasiun radio ({idx + 1}/{len(s_dict)})")
-            url = station_attr["url"]
-            stat = station.check_station_url(url)
-            station.stations[station_name]["status"] = stat
-        stations_dict = station.get_stations()
-
-        # String fomatting
-        stations_fmt = ""
-        for station_name, station_attr in stations_dict.items():
-            mark = "✅" if station_attr["status"] == 200 else "❌"
-            stations_fmt += f"• Status for {station_name} is `{station_attr['status']}` {mark}\n"
-
-        await ctx.send(f"Station url info: ```{stations_fmt}```")
         return

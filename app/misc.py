@@ -11,7 +11,7 @@ from tabulate import tabulate
 from .utils import (
     chunk_list, get_page, Playing, run_sys_info,
     run_speedtest, run_ping, split_to_list, run_cmd,
-    create_tempfile
+    create_tempfile, Stations
 )
 from .external_api import dbox
 
@@ -120,6 +120,33 @@ class Misc(commands.Cog):
             all_play = playing.get_all_play().copy()
             for _, np in all_play.items():
                 await ctx.send(f"• Playing **{np['station']}** on **{np['guild_name']}**\n")
+        return
+
+    @commands.is_owner()
+    @commands.command("station-check")
+    async def _check_url(self, ctx):
+        """
+        Periksa URL stream stasiun radio
+        """
+
+        init_msg = await ctx.send("Memeriksa stasiun radio ...")
+
+        station = Stations()
+        s_dict = station.stations
+        for idx, (station_name, station_attr) in enumerate(s_dict.items()):
+            await init_msg.edit(content=f"Memeriksa stasiun radio ({idx + 1}/{len(s_dict)})")
+            url = station_attr["url"]
+            stat = station.check_station_url(url)
+            station.stations[station_name]["status"] = stat
+        stations_dict = station.get_stations()
+
+        # String fomatting
+        stations_fmt = ""
+        for station_name, station_attr in stations_dict.items():
+            mark = "✅" if station_attr["status"] == 200 else "❌"
+            stations_fmt += f"• Status for {station_name} is `{station_attr['status']}` {mark}\n"
+
+        await ctx.send(f"Station url info: ```{stations_fmt}```")
         return
 
     @commands.is_owner()
