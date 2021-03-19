@@ -10,8 +10,11 @@ CONTENT_HOST = lambda: 'https://content.dropboxapi.com/2/'
 
 BASE_HEADERS = {
     'Authorization': f'Bearer {os.getenv("DBOX_TOKEN")}',
-    'Cache-Control': 'no-cache'
+    'Cache-Control': 'no-cache',
+    'Content-Type': 'application/json',
 }
+
+dbox_api = api(HOST, BASE_HEADERS)
 
 
 def upload_file(file, filename):
@@ -27,22 +30,12 @@ def upload_file(file, filename):
 
 
 def create_share_link(file_path):
-    headers = dict(BASE_HEADERS, **{
-        'Content-Type': 'application/json',
-    })
     payload = f'{{"path": "{file_path}"}}'
-
-    dbox_api = api(HOST, headers)
     result = dbox_api('post', 'sharing/create_shared_link_with_settings', payload, False)
     return result
 
 
 def get_link(file_id):
-    headers = dict(BASE_HEADERS, **{
-        'Content-Type': 'application/json',
-    })
     payload = f'{{"path": "{file_id}"}}'
-
-    dbox_api = api(HOST, headers)
     result = dbox_api('post', 'sharing/list_shared_links', payload, False)
     return result
