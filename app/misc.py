@@ -1,8 +1,6 @@
 import asyncio
 import discord
 import functools
-import os
-import datetime
 
 from discord.ext import commands
 from concurrent.futures import ThreadPoolExecutor
@@ -11,7 +9,7 @@ from tabulate import tabulate
 from .utils import (
     chunk_list, get_page, Playing, run_sys_info,
     run_speedtest, run_ping, split_to_list, run_cmd,
-    create_tempfile, Stations
+    Stations, generate_report_csv
 )
 from .external_api import dbox
 
@@ -225,29 +223,11 @@ class Misc(commands.Cog):
             params = " ".join(params[:])
 
         guild_obj = self.bot.guilds
-        total_guild = len(guild_obj)
 
         # prepare csv
         await ctx.send("Preparing data ...")
 
-        csv_guilds = ""
-        total_member = 0
-        num = 1
-        for guild in guild_obj:
-            csv_guilds += f'{num},"{guild.name}",{guild.member_count},{guild.id}\n'
-            total_member += guild.member_count
-            num += 1
-
-        csv_report = f"Added by {total_guild} servers\n"
-        csv_report += f"Total members: {total_member}\n\n"
-
-        csv_report += "id,name,member_cnt,guild_id\n"
-        csv_report += csv_guilds
-
-        now = datetime.datetime.now().strftime("%Y-%m-%d-%H:%M")
-        file = create_tempfile(csv_report)
-        env = os.environ.get("ENVIRONMENT")
-        filename = f"RadioID_{env}_{now}.csv"
+        file, filename = generate_report_csv(guild_obj, params)
 
         await ctx.send("Uploading stats to dropbox")
         ul, ul_info = dbox.upload_file(file, filename)
@@ -256,7 +236,7 @@ class Misc(commands.Cog):
             return
         await ctx.send(f"File uploaded at `{ul.get('path_display')}`")
 
-        if params == "with link":
+        if "link" in params:
             await ctx.send("Generating link ...")
             gl, gl_info = dbox.create_share_link(ul.get('path_display'))
             if gl_info['status_code'] != 200:

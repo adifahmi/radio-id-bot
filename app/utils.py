@@ -7,6 +7,8 @@ import psutil
 import subprocess
 import platform
 import tempfile
+import datetime
+import os
 
 from collections import OrderedDict
 from urllib.request import urlopen
@@ -361,3 +363,44 @@ def create_tempfile(data):
     file = fp.read()
     fp.close()
     return file
+
+
+def list_to_csv(datas):
+    return '|'.join(map(str, datas))
+
+
+def generate_report_csv(guild_obj, params):
+    total_guild = len(guild_obj)
+    csv_guilds = ""
+    csv_guilds_detail = ""
+    total_member = 0
+    num = 1
+    for guild in guild_obj:
+        csv_guilds += f'{num},"{guild.name}",{guild.member_count},{guild.id}\n'
+        csv_guilds_detail += f'{num},"{guild.name}",{guild.member_count},{guild.id},'
+        csv_guilds_detail += f'{guild.created_at},{guild.region},{guild.bitrate_limit},{guild.preferred_locale},'
+        csv_guilds_detail += f'{guild.premium_tier},{guild.icon_url},"{list_to_csv([x.name for x in guild.roles])}",'
+        csv_guilds_detail += f'"{list_to_csv([x.name for x in guild.text_channels])}",'
+        csv_guilds_detail += f'"{list_to_csv([x.name for x in guild.voice_channels])}"\n'
+
+        total_member += guild.member_count
+        num += 1
+
+    csv_report = f"Added by {total_guild} servers\n"
+    csv_report += f"Total members: {total_member}\n\n"
+
+    if "details" in params:
+        csv_report += "ID,Name,Member Count,Guild ID,Created At (UTC),Voice Region,Bitrate Limit," + \
+            "Preferred Locale,Premium Tier,Icon URL,Roles,Text Channels,Voice Channels\n"
+        csv_report += csv_guilds_detail
+    else:
+        csv_report += "ID,Name,Member Count,Guild ID\n"
+        csv_report += csv_guilds
+
+    now = datetime.datetime.now().strftime("%Y-%m-%d-%H:%M")
+    file = create_tempfile(csv_report)
+    env = os.environ.get("ENVIRONMENT")
+    filename = f"{env}/RadioID_{now}.csv"
+    if "details" in params:
+        filename = f"{env}/RadioID_{now}_details.csv"
+    return file, filename

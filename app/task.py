@@ -1,11 +1,13 @@
 import asyncio
 import dbl
 import os
+import functools
 
 from concurrent.futures import ThreadPoolExecutor
 from discord.ext import commands, tasks
 from .static import RADIOID_SERVER_CHANNEL_ID
-from .utils import Stations, Playing, get_emoji_by_number
+from .utils import Stations, Playing, get_emoji_by_number, generate_report_csv
+from .external_api import dbox
 
 
 class BotTask(commands.Cog):
@@ -17,6 +19,7 @@ class BotTask(commands.Cog):
         self.post_server_cnt.start()
         self.update_station_stat.start()
         self.whos_playing.start()
+        self.post_bot_stats.start()
 
     @tasks.loop(hours=3)
     async def post_server_cnt(self):
@@ -74,4 +77,33 @@ class BotTask(commands.Cog):
 
     @whos_playing.before_loop
     async def before_whos_playing(self):
+        await self.bot.wait_until_ready()
+
+    @tasks.loop(hours=25)
+    async def post_bot_stats(self):
+        if os.environ.get("ENVIRONMENT") == "dev":
+            return
+
+        channel = self.bot.get_channel(RADIOID_SERVER_CHANNEL_ID)
+
+        loop = asyncio.get_event_loop()
+
+        await channel.send("Uploading summary stats to dropbox ...")
+        file, filename = await loop.run_in_executor(ThreadPoolExecutor(), functools.partial(generate_report_csv, self.bot.guilds, ""))
+        ul, ul_info = dbox.upload_file(file, filename)
+        if ul_info['status_code'] != 200:
+            await channel.send(f"Failed to upload ```{str(ul_info['error'])}```")
+            return
+        await channel.send(f"Summary stats uploaded at `{ul.get('path_display')}`")
+
+        await channel.send("Uploading details stats to dropbox ...")
+        file, filename = await loop.run_in_executor(ThreadPoolExecutor(), functools.partial(generate_report_csv, self.bot.guilds, "details"))
+        ul, ul_info = dbox.upload_file(file, filename)
+        if ul_info['status_code'] != 200:
+            await channel.send(f"Failed to upload ```{str(ul_info['error'])}```")
+            return
+        await channel.send(f"Details stats uploaded at `{ul.get('path_display')}`")
+
+    @post_bot_stats.before_loop
+    async def before_post_bot_stats(self):
         await self.bot.wait_until_ready()
