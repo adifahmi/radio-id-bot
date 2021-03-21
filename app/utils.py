@@ -378,8 +378,11 @@ def generate_report_csv(guild_obj, params):
     for guild in guild_obj:
         csv_guilds += f'{num},"{guild.name}",{guild.member_count},{guild.id}\n'
         csv_guilds_detail += f'{num},"{guild.name}",{guild.member_count},{guild.id},'
-        csv_guilds_detail += f'{guild.created_at},{guild.region},{guild.bitrate_limit},{guild.preferred_locale},'
-        csv_guilds_detail += f'{guild.premium_tier},{guild.icon_url},"{list_to_csv([x.name for x in guild.roles])}",'
+        csv_guilds_detail += f'{guild.created_at},{guild.region},{guild.bitrate_limit},'
+        csv_guilds_detail += f'{guild.me.nick},"{list_to_csv([x.name for x in guild.me.roles])}",'
+        csv_guilds_detail += f'{guild.preferred_locale},{guild.premium_tier},{guild.icon_url},'
+        csv_guilds_detail += f'"{list_to_csv([x for x in guild.features])}",'
+        csv_guilds_detail += f'"{list_to_csv([x.name for x in guild.roles])}",'
         csv_guilds_detail += f'"{list_to_csv([x.name for x in guild.text_channels])}",'
         csv_guilds_detail += f'"{list_to_csv([x.name for x in guild.voice_channels])}"\n'
 
@@ -390,8 +393,8 @@ def generate_report_csv(guild_obj, params):
     csv_report += f"Total members: {total_member}\n\n"
 
     if "details" in params:
-        csv_report += "ID,Name,Member Count,Guild ID,Created At (UTC),Voice Region,Bitrate Limit," + \
-            "Preferred Locale,Premium Tier,Icon URL,Roles,Text Channels,Voice Channels\n"
+        csv_report += "ID,Name,Member Count,Guild ID,Created At (UTC),Voice Region,Bitrate Limit,Bot Nick," + \
+            "Bot Roles,Preferred Locale,Premium Tier,Icon URL,Features,Roles,Text Channels,Voice Channels\n"
         csv_report += csv_guilds_detail
     else:
         csv_report += "ID,Name,Member Count,Guild ID\n"
