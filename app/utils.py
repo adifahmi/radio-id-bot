@@ -377,9 +377,10 @@ def generate_report_csv(guild_obj, params):
     num = 1
     for guild in guild_obj:
         csv_guilds += f'{num},"{guild.name}",{guild.member_count},{guild.id}\n'
+
         csv_guilds_detail += f'{num},"{guild.name}",{guild.member_count},{guild.id},'
         csv_guilds_detail += f'{guild.created_at},{guild.region},{guild.bitrate_limit},'
-        csv_guilds_detail += f'{guild.me.nick},"{list_to_csv([x.name for x in guild.me.roles])}",'
+        csv_guilds_detail += f'"{guild.me.nick}"","{list_to_csv([x.name for x in guild.me.roles])}",'
         csv_guilds_detail += f'{guild.preferred_locale},{guild.premium_tier},{guild.icon_url},'
         csv_guilds_detail += f'"{list_to_csv([x for x in guild.features])}",'
         csv_guilds_detail += f'"{list_to_csv([x.name for x in guild.roles])}",'
