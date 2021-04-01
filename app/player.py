@@ -155,7 +155,8 @@ class RadioPlayer(commands.Cog):
                 if vc.is_playing():
                     # send promo message once at a time in a session
                     if already_promote is False:
-                        await ctx.send(f"Tahukan kamu? sekarang kamu bisa bantu donasi untuk pengembangan bot ini melalui link saweria di `{self.prefix} donate` :innocent:")
+                        pass
+                        # await ctx.send(f"Tahukan kamu? sekarang kamu bisa bantu donasi untuk pengembangan bot ini melalui link saweria di `{self.prefix} donate` :innocent:")
                     already_promote = True
 
                     await asyncio.sleep(5)
