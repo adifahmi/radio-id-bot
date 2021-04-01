@@ -6,7 +6,7 @@ SAWERIA_URL = "https://saweria.co/radioid"
 PAYPAL_URL = "https://paypal.me/adifahmi"
 
 BOT_NAME = "Radio Indonesia"
-BOT_DESC = "Radio Indonesia adalah discord bot sederhana yang dibuat menggunakan library discord.py \
+BOT_DESC = "Radio Indonesia adalah non-profit discord bot yang dibuat menggunakan library discord.py \
                 untuk memainkan stasiun radio favorit kamu."
 BOT_GITHUB_URL = "https://github.com/AdiFahmi/radio-id-bot"
 BOT_TOP_GG_URL = "https://top.gg/bot/777757482687922198"

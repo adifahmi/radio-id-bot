@@ -4,10 +4,8 @@ from discord.ext import commands
 from .external_api import ksoft
 from .static import (
     RADIO_ID_LOGO_URL, BOT_NAME, BOT_DESC, BOT_GITHUB_URL,
-    BOT_TOP_GG_URL, BOT_DBL_URL, BOT_SUPPORT_SERVER_INV,
-    AUTHOR_NAME, AUTHOR_TWITTER_URL, AUTHOR_ICON_URL,
-    SAWERIA_URL, DONATE_IMAGE_URL, PAYPAL_URL,
-    BOT_INVITE_LINK
+    BOT_TOP_GG_URL, BOT_DBL_URL, BOT_SUPPORT_SERVER_INV, AUTHOR_TWITTER_URL,
+    SAWERIA_URL, DONATE_IMAGE_URL, BOT_INVITE_LINK
 )
 
 
@@ -76,17 +74,13 @@ class Extras(commands.Cog):
             description=BOT_DESC,
             color=0x9395a5
         )
-        embed.set_author(
-            name=AUTHOR_NAME,
-            url=AUTHOR_TWITTER_URL,
-            icon_url=AUTHOR_ICON_URL
-        )
         embed.set_thumbnail(url=RADIO_ID_LOGO_URL)
 
         embed.add_field(name="Open source code", value=f"[Github]({BOT_GITHUB_URL})", inline=False)
-        embed.add_field(name="Donasi", value=f"[Saweria]({SAWERIA_URL}), [Paypal]({PAYPAL_URL})", inline=False)
+        embed.add_field(name="Donasi (untuk hosting bot)", value=f"[Saweria]({SAWERIA_URL})", inline=False)
         embed.add_field(name="Vote this bot", value=f"[top.gg]({BOT_TOP_GG_URL}), [DBL]({BOT_DBL_URL})", inline=False)
         embed.add_field(name="Support server", value=f"[AF Home]({BOT_SUPPORT_SERVER_INV})", inline=False)
+        embed.add_field(name="Contact me (for station-removal, etc)", value=f"[Twitter]({AUTHOR_TWITTER_URL})", inline=False)
         embed.set_footer(text="radio-id")
         await ctx.send(embed=embed)
         return
@@ -115,11 +109,10 @@ class Extras(commands.Cog):
 
         embed = discord.Embed(
             title="Donasi",
-            description="Dukung pengembangan dan biaya hosting bot ini dengan cara berdonasi melalui saweria atau paypal",
+            description="Dukung pengembangan dan biaya hosting bot ini dengan cara berdonasi melalui saweria",
             color=0x9395a5
         )
         embed.add_field(name="Saweria", value=f"[{SAWERIA_URL}]({SAWERIA_URL})", inline=False)
-        embed.add_field(name="Paypal", value=f"[{PAYPAL_URL}]({PAYPAL_URL})", inline=False)
         embed.set_thumbnail(url=DONATE_IMAGE_URL)
         embed.set_footer(text="radio-id")
         await ctx.send(embed=embed)
