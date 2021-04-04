@@ -86,7 +86,7 @@ class Stations:
 
     def check_station_url(self, url):
         try:
-            req = urlopen(url)
+            req = urlopen(url, timeout=2)
             stat = req.getcode()
         except HTTPError as e:
             stat = str(e)
