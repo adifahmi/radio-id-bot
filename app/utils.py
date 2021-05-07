@@ -9,6 +9,7 @@ import platform
 import tempfile
 import datetime
 import os
+import ssl
 
 from collections import OrderedDict
 from urllib.request import urlopen
@@ -85,8 +86,11 @@ class Stations:
         return self.stations.get(station_name)
 
     def check_station_url(self, url):
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
         try:
-            req = urlopen(url, timeout=2)
+            req = urlopen(url, timeout=2, context=ctx)
             stat = req.getcode()
         except HTTPError as e:
             stat = str(e)
