@@ -127,7 +127,10 @@ class RadioPlayer(commands.Cog):
 
             # this function is called after the audio source has been exhausted or an error occurred
             def _vc_end(error):
-                self.playing.remove_from_play(ctx.guild.id)  # Remove from NP
+                try:
+                    self.playing.remove_from_play(ctx.guild.id)  # Remove from NP
+                except AttributeError:
+                    pass
 
                 stop_msg = f"Berhenti memutar **{station}** :mute:"
                 if error:
