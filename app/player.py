@@ -27,11 +27,15 @@ class RadioPlayer(commands.Cog):
                     await vc.move_to(channel)
                     await ctx.send(f"Radio pindah ke: **{channel}**")
             else:
-                await channel.connect()
+                await channel.connect(timeout=5.0, reconnect=False)
                 vc = ctx.voice_client
                 await ctx.send(f"Radio terhubung ke: **{channel}**")
         except asyncio.TimeoutError:
-            await ctx.send(f"Gagal terhubung ke: **<{channel}>** `Error connection timed out`, coba ganti server region kamu ke Negara lain, contoh: Japan")
+            await ctx.send(f"Gagal terhubung ke: **<{channel}>** `Error connection timed out`, pastikan bot memiliki *role* untuk bisa join ke **{channel}**, jika masih gagal, silahkan coba ganti region voice channel kamu.")
+            return
+        except Exception as err:
+            print(f"join_or_move on {channel}, {err}")
+            await ctx.send(f"Gagal terhubung ke: **<{channel}>** `{err}`, pastikan bot memiliki *role* untuk bisa join ke **{channel}**, jika masih gagal, silahkan coba ganti region voice channel kamu.")
             return
         return vc
 
@@ -55,6 +59,15 @@ class RadioPlayer(commands.Cog):
             except AttributeError:
                 await ctx.send("Silahkan pilih voice channel atau kamu harus masuk ke voice channel terlebih dahulu.")
                 return
+
+        perm = channel.permissions_for(ctx.guild.me)
+        if perm.connect is False:
+            await ctx.send(f"Gagal terhubung ke **{channel}**, pastikan bot memiliki *role* yang tepat untuk bisa join ke **{channel}**.")
+            return
+
+        if perm.speak is False:
+            await ctx.send(f"Bot tidak memiliki *role* untuk berbicara di **{channel}**, pastikan bot memiliki *role* yang tepat untuk bisa berbicara di **{channel}**.")
+            return
 
         await self.join_or_move(ctx, channel)
         return
@@ -148,7 +161,7 @@ class RadioPlayer(commands.Cog):
                 self.playing.add_to_play(ctx.guild.id, ctx.guild.name, station)  # Add to NP
             except Exception as e:
                 print(f"Error playing {station} | {e}")
-                await ctx.send(f"Terdapat gangguan pada server, gagal memutar **{station}**, coba ganti server region kamu ke Negara lain, contoh: Japan")
+                await ctx.send(f"Gagal memutar **{station}**, pastikan bot memiliki *role* yang tepat untuk bisa join ke **{channel}**, jika masih gagal, silahkan coba ganti region voice channel kamu.")
 
             already_promote = False
 
