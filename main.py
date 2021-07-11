@@ -21,7 +21,7 @@ if TOKEN is None:
     print("CONFIG ERROR: Please state your discord bot token in .env")
     exit()
 
-bot = commands.Bot(
+bot = commands.AutoShardedBot(
     command_prefix=f"{PREFIX} ",
     description="Discord bot untuk memainkan radio favoritmu!",
     help_command=None
