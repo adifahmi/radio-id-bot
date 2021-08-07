@@ -113,6 +113,9 @@ class BotTask(commands.Cog):
 
     @tasks.loop(hours=25)
     async def save_bot_stats(self):
+        if os.environ.get("ENVIRONMENT") == "dev":
+            return
+
         channel = self.bot.get_channel(RADIOID_SERVER_CHANNEL_ID)
 
         await channel.send("Saving stats to sqlite ...")
