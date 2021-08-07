@@ -2,14 +2,27 @@ import sqlite3
 
 
 class DBase:
-    def __init__(self) -> None:
-        self.conn = sqlite3.connect('database/app.db')
-        self.migration()
+    def __init__(self, database) -> None:
+        self.conn = sqlite3.connect(database)
 
     def migration(self):
         self.conn.execute(
             '''
-            CREATE TABLE IF NOT EXISTS guild (
+            '''
+        )
+        self.conn.execute(
+            '''
+            DROP TABLE IF EXISTS guild;
+            '''
+        )
+        self.conn.execute(
+            '''
+            DROP TABLE IF EXISTS guild_details;
+            '''
+        )
+        self.conn.execute(
+            '''
+            CREATE TABLE guild (
                 ID              INTEGER PRIMARY KEY AUTOINCREMENT,
                 name            TEXT,
                 member_count    INT     NOT NULL,
@@ -19,7 +32,7 @@ class DBase:
         )
         self.conn.execute(
             '''
-            CREATE TABLE IF NOT EXISTS guild_details (
+            CREATE TABLE guild_details (
                 ID              INTEGER PRIMARY KEY AUTOINCREMENT,
                 name            TEXT,
                 member_count    INT     NOT NULL,
@@ -35,13 +48,13 @@ class DBase:
                 features        TEXT,
                 roles           TEXT,
                 text_channels   TEXT,
-                voice_channels  TEXT,
+                voice_channels  TEXT
             );
             '''
         )
 
-    def insert(self, fields, values):
-        self.conn.execute(f"INSERT INTO guild ({fields}) VALUES ({values})")
+    def insert(self, table, fields, values):
+        self.conn.execute(f"INSERT INTO {table} {fields} VALUES {values};")
         self.conn.commit()
 
     def close_conn(self):
