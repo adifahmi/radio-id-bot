@@ -2,6 +2,7 @@ import asyncio
 import dbl
 import os
 import functools
+import datetime
 
 from concurrent.futures import ThreadPoolExecutor
 from discord.ext import commands, tasks
@@ -120,23 +121,23 @@ class BotTask(commands.Cog):
 
         await channel.send("Saving stats to sqlite ...")
 
-        db = db_manager.DBase('database/app.db')
+        saved_to = 'database/guild.db'
+        db = db_manager.DBase(saved_to)
         db.migration()
 
         loop = asyncio.get_event_loop()
         gi = GuildInfo(self.bot.guilds)
+
         extracted_guild = await loop.run_in_executor(
             ThreadPoolExecutor(),
             functools.partial(gi.extract_guild_obj, "")
         )
-
         fields = ",".join(gi.title)
         fields = f'({fields})'
         values = ""
         for g in extracted_guild.splitlines():
             comma = '' if values == "" else ','
             values += f'{comma}({g})'
-
         db.insert(
             table="guild",
             fields=fields,
@@ -147,22 +148,31 @@ class BotTask(commands.Cog):
             ThreadPoolExecutor(),
             functools.partial(gi.extract_guild_obj, True)
         )
-
         fields = ",".join(gi.title_details)
         fields = f'({fields})'
         values = ""
         for g in extracted_guild_details.splitlines():
             comma = '' if values == "" else ','
             values += f'{comma}({g})'
-
         db.insert(
             table="guild_details",
             fields=fields,
             values=values
         )
-        db.close_conn()
 
+        db.close_conn()
         await channel.send("Stats saved to sqlite ...")
+
+        env = os.environ.get("ENVIRONMENT")
+        now = datetime.datetime.now().strftime("%Y-%m-%d-%H:%M")
+        filename = f"{env}/db/guild_{now}.db"
+
+        with open(saved_to, 'rb') as f:
+            ul, ul_info = dbox.upload_file(f.read(), filename)
+            if ul_info['status_code'] != 200:
+                await channel.send(f"Failed to upload {filename} ```{str(ul_info['error'])}```")
+                return
+        await channel.send(f"File uploaded at `{ul.get('path_display')}`")
 
     @save_bot_stats.before_loop
     async def before_save_bot_stats(self):
