@@ -95,7 +95,7 @@ class RadioPlayer(commands.Cog):
         await ctx.send(f"```{stations_fmt}```")
         await ctx.send(f"\nketik `{self.prefix} play <stasiun radio>` untuk memulai memutar, contoh: `{self.prefix} play {random.choice(stations_list)}`")
         await ctx.send(f"Stasiun favorit kamu tidak tersedia? ketik `{self.prefix} support` untuk gabung ke support server dan silahkan request di sana")
-        await ctx.send(f"Kamu juga bisa bantu donasi untuk pengembangan bot ini di `{self.prefix} donate`")
+        await ctx.send(f"Kamu juga bisa bantu donasi untuk biaya hosting bot ini di `{self.prefix} donate`")
         return
 
     @commands.cooldown(rate=1, per=5, type=commands.BucketType.guild)
