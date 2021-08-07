@@ -9,7 +9,7 @@ from tabulate import tabulate
 from .utils import (
     chunk_list, get_page, Playing, run_sys_info,
     run_speedtest, run_ping, split_to_list, run_cmd,
-    Stations, generate_report_csv
+    Stations, GuildInfo
 )
 from .external_api import dbox
 
@@ -226,8 +226,8 @@ class Misc(commands.Cog):
 
         # prepare csv
         await ctx.send("Preparing data ...")
-
-        file, filename = generate_report_csv(guild_obj, params)
+        gi = GuildInfo(guild_obj)
+        file, filename = gi.generate_report_csv(params)
 
         await ctx.send("Uploading stats to dropbox")
         ul, ul_info = dbox.upload_file(file, filename)

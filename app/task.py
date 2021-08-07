@@ -6,8 +6,9 @@ import functools
 from concurrent.futures import ThreadPoolExecutor
 from discord.ext import commands, tasks
 from .static import RADIOID_SERVER_CHANNEL_ID
-from .utils import Stations, Playing, get_emoji_by_number, generate_report_csv
+from .utils import Stations, Playing, GuildInfo, get_emoji_by_number
 from .external_api import dbox
+from database import db_manager
 
 
 class BotTask(commands.Cog):
@@ -20,6 +21,7 @@ class BotTask(commands.Cog):
         self.update_station_stat.start()
         self.whos_playing.start()
         self.post_bot_stats.start()
+        self.save_bot_stats.start()
 
     @tasks.loop(hours=3)
     async def post_server_cnt(self):
@@ -87,9 +89,10 @@ class BotTask(commands.Cog):
         channel = self.bot.get_channel(RADIOID_SERVER_CHANNEL_ID)
 
         loop = asyncio.get_event_loop()
+        gi = GuildInfo(self.bot.guilds)
 
         await channel.send("Uploading summary stats to dropbox ...")
-        file, filename = await loop.run_in_executor(ThreadPoolExecutor(), functools.partial(generate_report_csv, self.bot.guilds, ""))
+        file, filename = await loop.run_in_executor(ThreadPoolExecutor(), functools.partial(gi.generate_report_csv, ""))
         ul, ul_info = dbox.upload_file(file, filename)
         if ul_info['status_code'] != 200:
             await channel.send(f"Failed to upload ```{str(ul_info['error'])}```")
@@ -97,7 +100,7 @@ class BotTask(commands.Cog):
         await channel.send(f"Summary stats uploaded at `{ul.get('path_display')}`")
 
         await channel.send("Uploading details stats to dropbox ...")
-        file, filename = await loop.run_in_executor(ThreadPoolExecutor(), functools.partial(generate_report_csv, self.bot.guilds, "details"))
+        file, filename = await loop.run_in_executor(ThreadPoolExecutor(), functools.partial(gi.generate_report_csv, "details"))
         ul, ul_info = dbox.upload_file(file, filename)
         if ul_info['status_code'] != 200:
             await channel.send(f"Failed to upload ```{str(ul_info['error'])}```")
@@ -106,4 +109,58 @@ class BotTask(commands.Cog):
 
     @post_bot_stats.before_loop
     async def before_post_bot_stats(self):
+        await self.bot.wait_until_ready()
+
+    @tasks.loop(hours=25)
+    async def save_bot_stats(self):
+        channel = self.bot.get_channel(RADIOID_SERVER_CHANNEL_ID)
+
+        await channel.send("Saving stats to sqlite ...")
+
+        db = db_manager.DBase('database/app.db')
+        db.migration()
+
+        loop = asyncio.get_event_loop()
+        gi = GuildInfo(self.bot.guilds)
+        extracted_guild = await loop.run_in_executor(
+            ThreadPoolExecutor(),
+            functools.partial(gi.extract_guild_obj, "")
+        )
+
+        fields = ",".join(gi.title)
+        fields = f'({fields})'
+        values = ""
+        for g in extracted_guild.splitlines():
+            comma = '' if values == "" else ','
+            values += f'{comma}({g})'
+
+        db.insert(
+            table="guild",
+            fields=fields,
+            values=values
+        )
+
+        extracted_guild_details = await loop.run_in_executor(
+            ThreadPoolExecutor(),
+            functools.partial(gi.extract_guild_obj, True)
+        )
+
+        fields = ",".join(gi.title_details)
+        fields = f'({fields})'
+        values = ""
+        for g in extracted_guild_details.splitlines():
+            comma = '' if values == "" else ','
+            values += f'{comma}({g})'
+
+        db.insert(
+            table="guild_details",
+            fields=fields,
+            values=values
+        )
+        db.close_conn()
+
+        await channel.send("Stats saved to sqlite ...")
+
+    @save_bot_stats.before_loop
+    async def before_save_bot_stats(self):
         await self.bot.wait_until_ready()
