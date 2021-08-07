@@ -373,42 +373,66 @@ def list_to_csv(datas):
     return '|'.join(map(str, datas))
 
 
-def generate_report_csv(guild_obj, params):
-    total_guild = len(guild_obj)
-    csv_guilds = ""
-    csv_guilds_detail = ""
-    total_member = 0
-    num = 1
-    for guild in guild_obj:
-        csv_guilds += f'{num},"{guild.name}",{guild.member_count},{guild.id}\n'
+class GuildInfo():
+    def __init__(self, guild_obj) -> None:
+        self.title = ["ID", "name", "member_count", "guild_id"]
+        self.title_details = self.title + [
+            "created_at", "voice_region", "bitrate_limit",
+            "bot_nickname", "bot_roles", "pref_locale", "premium_tier",
+            "icon_url", "features", "roles", "text_channels", "voice_channels"
+        ]
+        self.guild_obj = guild_obj
 
-        csv_guilds_detail += f'{num},"{guild.name}",{guild.member_count},{guild.id},'
-        csv_guilds_detail += f'{guild.created_at},{guild.region},{guild.bitrate_limit},'
-        csv_guilds_detail += f'"{guild.me.nick}","{list_to_csv([x.name for x in guild.me.roles])}",'
-        csv_guilds_detail += f'{guild.preferred_locale},{guild.premium_tier},{guild.icon_url},'
-        csv_guilds_detail += f'"{list_to_csv([x for x in guild.features])}",'
-        csv_guilds_detail += f'"{list_to_csv([x.name for x in guild.roles])}",'
-        csv_guilds_detail += f'"{list_to_csv([x.name for x in guild.text_channels])}",'
-        csv_guilds_detail += f'"{list_to_csv([x.name for x in guild.voice_channels])}"\n'
+    def extract_guild_obj(self, is_detailed=False):
+        extracted_guild_info = ""
+        extracted_guild_detail_info = ""
+        num = 1
+        for guild in self.guild_obj:
+            extracted_guild_info += f'{num},"{guild.name}",{guild.member_count},{guild.id}\n'
 
-        total_member += guild.member_count
-        num += 1
+            extracted_guild_detail_info += f'{num},"{guild.name}",{guild.member_count},{guild.id},'
+            extracted_guild_detail_info += f'"{guild.created_at}","{guild.region}",{guild.bitrate_limit},'
+            extracted_guild_detail_info += f'"{guild.me.nick}","{list_to_csv([x.name for x in guild.me.roles])}",'
+            extracted_guild_detail_info += f'"{guild.preferred_locale}",{guild.premium_tier},"{guild.icon_url}",'
+            extracted_guild_detail_info += f'"{list_to_csv([x for x in guild.features])}",'
+            extracted_guild_detail_info += f'"{list_to_csv([x.name for x in guild.roles])}",'
+            extracted_guild_detail_info += f'"{list_to_csv([x.name for x in guild.text_channels])}",'
+            extracted_guild_detail_info += f'"{list_to_csv([x.name for x in guild.voice_channels])}"\n'
 
-    csv_report = f"Added by {total_guild} servers\n"
-    csv_report += f"Total members: {total_member}\n\n"
+            num += 1
 
-    if "details" in params:
-        csv_report += "ID,Name,Member Count,Guild ID,Created At (UTC),Voice Region,Bitrate Limit,Bot Nick," + \
-            "Bot Roles,Preferred Locale,Premium Tier,Icon URL,Features,Roles,Text Channels,Voice Channels\n"
-        csv_report += csv_guilds_detail
-    else:
-        csv_report += "ID,Name,Member Count,Guild ID\n"
-        csv_report += csv_guilds
+        if is_detailed is True:
+            return extracted_guild_detail_info
+        return extracted_guild_info
 
-    now = datetime.datetime.now().strftime("%Y-%m-%d-%H:%M")
-    file = create_tempfile(csv_report)
-    env = os.environ.get("ENVIRONMENT")
-    filename = f"{env}/RadioID_{now}.csv"
-    if "details" in params:
-        filename = f"{env}/RadioID_{now}_details.csv"
-    return file, filename
+    def get_total_guild_member(self):
+        total_member = 0
+        for guild in self.guild_obj:
+            total_member += guild.member_count
+        return total_member
+
+    def generate_report_csv(self, params):
+        total_guild = len(self.guild_obj)
+        csv_guilds = self.extract_guild_obj()
+        csv_guilds_detail = self.extract_guild_obj(True)
+        total_member = self.get_total_guild_member()
+
+        csv_report = f"Added by {total_guild} servers\n"
+        csv_report += f"Total members: {total_member}\n\n"
+
+        if "details" in params:
+            csv_report += ",".join(self.title_details)
+            csv_report += "\n"
+            csv_report += csv_guilds_detail
+        else:
+            csv_report += ",".join(self.title)
+            csv_report += "\n"
+            csv_report += csv_guilds
+
+        now = datetime.datetime.now().strftime("%Y-%m-%d-%H:%M")
+        file = create_tempfile(csv_report)
+        env = os.environ.get("ENVIRONMENT")
+        filename = f"{env}/RadioID_{now}.csv"
+        if "details" in params:
+            filename = f"{env}/RadioID_{now}_details.csv"
+        return file, filename
