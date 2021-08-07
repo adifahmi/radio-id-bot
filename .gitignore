@@ -79,3 +79,4 @@ venv*
 .env
 stations.yaml
 devtest.py
+database/app.db
