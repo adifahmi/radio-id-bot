@@ -261,37 +261,62 @@ class Misc(commands.Cog):
         loop = asyncio.get_event_loop()
         gi = GuildInfo(self.bot.guilds)
 
-        extracted_guild = await loop.run_in_executor(
-            ThreadPoolExecutor(),
-            functools.partial(gi.extract_guild_obj, "")
-        )
+        try:
+            await ctx.send("Extracting guild data ...")
+            extracted_guild = await loop.run_in_executor(
+                ThreadPoolExecutor(),
+                functools.partial(gi.extract_guild_obj, "")
+            )
+        except Exception as err:
+            await ctx.send(f"Error extracting | {str(err)}")
+
         fields = ",".join(gi.title)
         fields = f'({fields})'
         values = ""
         for g in extracted_guild.splitlines():
             comma = '' if values == "" else ','
             values += f'{comma}({g})'
-        db.insert(
-            table="guild",
-            fields=fields,
-            values=values
-        )
 
-        extracted_guild_details = await loop.run_in_executor(
-            ThreadPoolExecutor(),
-            functools.partial(gi.extract_guild_obj, True)
-        )
+        try:
+            await ctx.send("Saving guild data ...")
+            db.insert(
+                table="guild",
+                fields=fields,
+                values=values
+            )
+        except Exception as err:
+            print("Fields", fields)
+            print("Values", values)
+            await ctx.send(f"Error saving | {str(err)}")
+
+        try:
+            await ctx.send("Extracting guild details data ...")
+            extracted_guild_details = await loop.run_in_executor(
+                ThreadPoolExecutor(),
+                functools.partial(gi.extract_guild_obj, True)
+            )
+        except Exception as err:
+            await ctx.send(f"Error extracting | {str(err)}")
+
         fields = ",".join(gi.title_details)
         fields = f'({fields})'
         values = ""
         for g in extracted_guild_details.splitlines():
             comma = '' if values == "" else ','
             values += f'{comma}({g})'
-        db.insert(
-            table="guild_details",
-            fields=fields,
-            values=values
-        )
+
+        try:
+            await ctx.send("Saving guild details data ...")
+            db.insert(
+                table="guild_details",
+                fields=fields,
+                values=values
+            )
+        except Exception as err:
+            print("Fields", fields)
+            print("Values", values)
+            await ctx.send(f"Error saving | {str(err)}")
+
         db.close_conn()
         await ctx.send("Stats saved to sqlite ...")
 
