@@ -1,8 +1,6 @@
 import asyncio
 import discord
 import functools
-import os
-import datetime
 
 from discord.ext import commands
 from concurrent.futures import ThreadPoolExecutor
@@ -14,7 +12,6 @@ from .utils import (
     Stations, GuildInfo
 )
 from .external_api import dbox
-from database import db_manager
 
 
 class Misc(commands.Cog):
@@ -248,85 +245,3 @@ class Misc(commands.Cog):
                 await ctx.send(f"Download link: {gl.get('url')}")
 
         return
-
-    @commands.is_owner()
-    @commands.command("save_db", hidden=True)
-    async def _save_stats_db(self, ctx, *params):
-        await ctx.send("Saving stats to sqlite ...")
-
-        saved_to = 'database/guild.db'
-        db = db_manager.DBase(saved_to)
-        db.migration()
-
-        loop = asyncio.get_event_loop()
-        gi = GuildInfo(self.bot.guilds)
-
-        try:
-            await ctx.send("Extracting guild data ...")
-            extracted_guild = await loop.run_in_executor(
-                ThreadPoolExecutor(),
-                functools.partial(gi.extract_guild_obj, "")
-            )
-        except Exception as err:
-            await ctx.send(f"Error extracting | {str(err)}")
-
-        fields = ",".join(gi.title)
-        fields = f'({fields})'
-        values = ""
-        for g in extracted_guild.splitlines():
-            comma = '' if values == "" else ','
-            values += f'{comma}({g})'
-
-        try:
-            await ctx.send("Saving guild data ...")
-            db.insert(
-                table="guild",
-                fields=fields,
-                values=values
-            )
-        except Exception as err:
-            print("Fields", fields)
-            print("Values", values)
-            await ctx.send(f"Error saving | {str(err)}")
-
-        try:
-            await ctx.send("Extracting guild details data ...")
-            extracted_guild_details = await loop.run_in_executor(
-                ThreadPoolExecutor(),
-                functools.partial(gi.extract_guild_obj, True)
-            )
-        except Exception as err:
-            await ctx.send(f"Error extracting | {str(err)}")
-
-        fields = ",".join(gi.title_details)
-        fields = f'({fields})'
-        values = ""
-        for g in extracted_guild_details.splitlines():
-            comma = '' if values == "" else ','
-            values += f'{comma}({g})'
-
-        try:
-            await ctx.send("Saving guild details data ...")
-            db.insert(
-                table="guild_details",
-                fields=fields,
-                values=values
-            )
-        except Exception as err:
-            print("Fields", fields)
-            print("Values", values)
-            await ctx.send(f"Error saving | {str(err)}")
-
-        db.close_conn()
-        await ctx.send("Stats saved to sqlite ...")
-
-        env = os.environ.get("ENVIRONMENT")
-        now = datetime.datetime.now().strftime("%Y-%m-%d-%H:%M")
-        filename = f"{env}/db/guild_{now}.db"
-
-        with open(saved_to, 'rb') as f:
-            ul, ul_info = dbox.upload_file(f.read(), filename)
-            if ul_info['status_code'] != 200:
-                await ctx.send(f"Failed to upload {filename} ```{str(ul_info['error'])}```")
-                return
-        await ctx.send(f"File uploaded at `{ul.get('path_display')}`")
