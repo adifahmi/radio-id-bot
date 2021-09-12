@@ -27,6 +27,9 @@ class Extras(commands.Cog):
         else:
             query = " ".join(query[:])
 
+        await ctx.send("Ksoft lyrics API is down, please try again later :(")
+        return
+
         resp, info = ksoft.get_lyrics(query)
         if info["status_code"] == 500:
             await ctx.send("Gagal mendapatkan lyric :cry:")
