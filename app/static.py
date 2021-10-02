@@ -32,7 +32,6 @@ COMMANDS = {
     "about": "Deskripsi tentang bot ini",
     "ping": "Latensi bot ke server discord",
     "lyrics <artis atau judul lagu>": "Menampilkan lyrics lagu berdasarkan input user",
-    "station-check": "Periksa URL stream stasiun radio",
     "support": "Link ke support discord server",
     "invite": "Link untuk memasukkan bot ini ke server discord",
 }
