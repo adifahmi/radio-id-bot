@@ -89,8 +89,8 @@ class RadioPlayer(commands.Cog):
             mark = "✓" if station_attr["status"] == 200 else "X"
             stations_fmt += f"📻 {station_name} {mark}\n"
         stations_fmt += "\n✓ = Stasiun radio dapat diputar\n"
-        stations_fmt += "X = Stasiun radio sedang mengalami gangguan\n"
-        stations_fmt += "\nUntuk sementara, semua stasiun dari Mahaka Radio Integra (Gen FM, Jak FM, Mustang FM, dll) tidak bisa diputar dan direquest di bot ini.\n"
+        stations_fmt += "X = Stasiun radio kemungkinan sedang mengalami gangguan\n"
+        # stations_fmt += "\nUntuk sementara, semua stasiun dari Mahaka Radio Integra (Gen FM, Jak FM, Mustang FM, dll) tidak bisa diputar dan direquest di bot ini.\n"
         stations_list = [k for k in stations_dict.keys()]
 
         await ctx.send(f"```{stations_fmt}```")
