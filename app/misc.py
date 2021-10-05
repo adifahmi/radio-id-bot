@@ -144,7 +144,10 @@ class Misc(commands.Cog):
             mark = "✅" if station_attr["status"] == 200 else "❌"
             stations_fmt += f"• Status for {station_name} is `{station_attr['status']}` {mark}\n"
 
-        await ctx.send(f"Station url info: ```{stations_fmt}```")
+        await ctx.send("Station url info:\n")
+        splitted_stations_fmt = split_to_list(stations_fmt, 1990)
+        for m in splitted_stations_fmt:
+            await ctx.send(f"```{m}```")
         return
 
     @commands.is_owner()

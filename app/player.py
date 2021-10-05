@@ -4,7 +4,8 @@ import random
 
 from discord.ext import commands
 from .utils import (
-    is_valid_url, Stations, Playing
+    is_valid_url, Stations, Playing,
+    split_to_list
 )
 
 
@@ -84,18 +85,21 @@ class RadioPlayer(commands.Cog):
 
         self.stations.reload_station_list()
         stations_dict = self.stations.get_stations()
+        stations_list = [k for k in stations_dict.keys()]
+
         stations_fmt = ""
         for station_name, station_attr in stations_dict.items():
             mark = "✓" if station_attr["status"] == 200 else "X"
             stations_fmt += f"📻 {station_name} {mark}\n"
         stations_fmt += "\n✓ = Stasiun radio dapat diputar\n"
         stations_fmt += "X = Stasiun radio kemungkinan sedang mengalami gangguan\n"
-        # stations_fmt += "\nUntuk sementara, semua stasiun dari Mahaka Radio Integra (Gen FM, Jak FM, Mustang FM, dll) tidak bisa diputar dan direquest di bot ini.\n"
-        stations_list = [k for k in stations_dict.keys()]
 
-        await ctx.send(f"```{stations_fmt}```")
-        await ctx.send(f"\nketik `{self.prefix} play <stasiun radio>` untuk memulai memutar, contoh: `{self.prefix} play {random.choice(stations_list)}`")
-        await ctx.send(f"Stasiun favorit kamu tidak tersedia? ketik `{self.prefix} support` untuk gabung ke support server dan silahkan request di sana")
+        splitted_stations_fmt = split_to_list(stations_fmt, 1990)
+        for m in splitted_stations_fmt:
+            await ctx.send(f"```{m}```")
+
+        await ctx.send(f"`{self.prefix} play <stasiun radio>` untuk memulai memutar, contoh: `{self.prefix} play {random.choice(stations_list)}`")
+        await ctx.send(f"`{self.prefix} support` untuk gabung ke support server (request tambah atau hapus stasiun)")
         await ctx.send(f"Kamu juga bisa bantu donasi untuk biaya hosting bot ini di `{self.prefix} donate`")
         return
 
