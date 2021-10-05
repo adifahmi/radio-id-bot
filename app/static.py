@@ -29,9 +29,9 @@ COMMANDS = {
     "playing": "Menampilkan stasiun radio yang sedang diputar",
     "leave": "Memutuskan bot dari Voice Channel",
     "donate": "Info tentang cara berdonasi untuk biaya server dan pengembagan bot ini",
-    "about": "Deskripsi tentang bot ini",
+    "about": "Deskripsi tentang bot ini (juga link ke Twitter untuk request hapus stasiun)",
     "ping": "Latensi bot ke server discord",
     "lyrics <artis atau judul lagu>": "Menampilkan lyrics lagu berdasarkan input user",
-    "support": "Link ke support discord server",
+    "support": "Link ke support discord server (untuk request tambah/hapus stasiun radio)",
     "invite": "Link untuk memasukkan bot ini ke server discord",
 }

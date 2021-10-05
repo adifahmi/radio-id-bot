@@ -82,7 +82,7 @@ class Extras(commands.Cog):
         embed.add_field(name="Open source code", value=f"[Github]({BOT_GITHUB_URL})", inline=False)
         embed.add_field(name="Donasi (untuk hosting bot)", value=f"[Saweria]({SAWERIA_URL})", inline=False)
         embed.add_field(name="Vote this bot", value=f"[top.gg]({BOT_TOP_GG_URL}), [DBL]({BOT_DBL_URL})", inline=False)
-        embed.add_field(name="Support server", value=f"[AF Home]({BOT_SUPPORT_SERVER_INV})", inline=False)
+        embed.add_field(name="Support server", value=f"[Radio ID Discord Bot]({BOT_SUPPORT_SERVER_INV})", inline=False)
         embed.add_field(name="Contact me (for station-removal, etc)", value=f"[Twitter]({AUTHOR_TWITTER_URL})", inline=False)
         embed.set_footer(text="radio-id")
         await ctx.send(embed=embed)
@@ -95,9 +95,9 @@ class Extras(commands.Cog):
         """
 
         embed = discord.Embed(
-            title="AF Home",
+            title="Radio Indonesia Discord Bot",
             url=BOT_SUPPORT_SERVER_INV,
-            description="Join server AF Home untuk memberikan masukan",
+            description="Join server Radio Indonesia Discord Bot untuk memberikan masukan, request tambah/hapus stasiun",
             color=0x9395a5
         )
         embed.set_footer(text="radio-id")
