@@ -115,7 +115,7 @@ class RadioPlayer(commands.Cog):
 
         while True:
             try:
-                reaction, user = await self.bot.wait_for('reaction_add', timeout=10.0)
+                reaction, user = await self.bot.wait_for('reaction_add', timeout=7.0)
                 # skip self bot reaction
                 if user.bot is True:
                     continue
