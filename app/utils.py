@@ -12,6 +12,7 @@ import os
 import ssl
 
 from collections import OrderedDict
+from itertools import islice
 from urllib.request import urlopen
 from urllib.error import HTTPError, URLError
 
@@ -288,6 +289,17 @@ def split_to_list(text: str, max_len: int = 1000):
     else:
         spllited_text = [text]
     return spllited_text
+
+
+def split_list(arr: list, n: int) -> list:
+    k, m = divmod(len(arr), n)
+    return (arr[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
+
+
+def dict_chunks(data: dict, SIZE: int = 10000):
+    it = iter(data)
+    for _ in range(0, len(data), SIZE):
+        yield {k: data[k] for k in islice(it, SIZE)}
 
 
 def convert_size(size_bytes):
