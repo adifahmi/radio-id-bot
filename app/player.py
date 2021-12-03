@@ -5,7 +5,7 @@ import random
 from discord.ext import commands
 from .utils import (
     is_valid_url, Stations, Playing,
-    split_list, EMOJI_NUMBER, get_number_by_emoji
+    split_to_list
 )
 
 
@@ -73,24 +73,6 @@ class RadioPlayer(commands.Cog):
         await self.join_or_move(ctx, channel)
         return
 
-    @staticmethod
-    def generate_stations(stations_dict, station_list, page, total_page):
-        stations_fmt = ""
-        for station_name in station_list[page]:
-            status = stations_dict[station_name]["status"]
-            mark = "✓" if status == 200 else "X"
-            stations_fmt += f"📻 {station_name} {mark}\n"
-        stations_fmt += "\n✓ = Stasiun radio dapat diputar\n"
-        stations_fmt += "X = Stasiun radio kemungkinan sedang mengalami gangguan\n"
-        stations_fmt += f"\nPage {page + 1} of {total_page}\n"
-        return stations_fmt
-
-    @staticmethod
-    async def page_reaction(init_msg, total_page):
-        for page in range(1, total_page + 1):
-            await init_msg.add_reaction(EMOJI_NUMBER[page])
-        return
-
     @commands.cooldown(rate=1, per=3, type=commands.BucketType.guild)
     @commands.guild_only()
     @commands.command("list")
@@ -105,31 +87,16 @@ class RadioPlayer(commands.Cog):
         stations_dict = self.stations.get_stations()
         stations_list = [k for k in stations_dict.keys()]
 
-        total_page = 3
-        stations_dict = dict(stations_dict)
-        splitted_sl = list(split_list(stations_list, total_page))
-        stations_fmt = self.generate_stations(stations_dict, splitted_sl, 0, total_page)
+        stations_fmt = ""
+        for station_name, station_attr in stations_dict.items():
+            mark = "✓" if station_attr["status"] == 200 else "X"
+            stations_fmt += f"📻 {station_name} {mark}\n"
+        stations_fmt += "\n✓ = Stasiun radio dapat diputar\n"
+        stations_fmt += "X = Stasiun radio kemungkinan sedang mengalami gangguan\n"
 
-        list_radio_msg = await ctx.send(f"```{stations_fmt}```")
-        await self.page_reaction(list_radio_msg, total_page)
-
-        while True:
-            try:
-                reaction, user = await self.bot.wait_for('reaction_add', timeout=7.0)
-                # skip self bot reaction
-                if user.bot is True:
-                    continue
-                await list_radio_msg.clear_reactions()
-                selected_page = get_number_by_emoji(reaction)
-                selected_page = int(selected_page) - 1
-                await list_radio_msg.edit(content=f"```{self.generate_stations(stations_dict, splitted_sl, selected_page, total_page)}```")
-                await self.page_reaction(list_radio_msg, total_page)
-            except asyncio.TimeoutError:
-                await list_radio_msg.clear_reactions()
-                break
-            except Exception:
-                await list_radio_msg.clear_reactions()
-                break
+        splitted_stations_fmt = split_to_list(stations_fmt, 1990)
+        for m in splitted_stations_fmt:
+            await ctx.send(f"```{m}```")
 
         await ctx.send(f"`{self.prefix} play <stasiun radio>` untuk memulai memutar, contoh: `{self.prefix} play {random.choice(stations_list)}`")
         await ctx.send(f"`{self.prefix} support` untuk gabung ke support server (request tambah atau hapus stasiun)")
