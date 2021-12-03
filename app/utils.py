@@ -5,7 +5,7 @@ import re
 import yaml
 import psutil
 import subprocess
-import platform
+import distro
 import tempfile
 import datetime
 import os
@@ -313,7 +313,7 @@ def convert_size(size_bytes):
 
 
 def run_sys_info():
-    sys_name = f"{platform.system()} - {platform.release()} ({platform.dist()[0]} {platform.dist()[1]} {platform.dist()[2]})"
+    sys_name = ' '.join([x for x in distro.linux_distribution()])
 
     total_cpu = psutil.cpu_count()
     cpu_usage_overall = psutil.cpu_percent(interval=1)
