@@ -1,5 +1,5 @@
 import asyncio
-import dbl
+import topgg
 import os
 import functools
 
@@ -15,7 +15,7 @@ class BotTask(commands.Cog):
         self.bot = bot
         self.prefix = prefix
         self.token = os.getenv("DBL_TOKEN")  # set this to your DBL token
-        self.dblpy = dbl.DBLClient(self.bot, self.token)
+        self.dblpy = topgg.DBLClient(self.bot, self.token)
         self.post_server_cnt.start()
         self.update_station_stat.start()
         self.whos_playing.start()
