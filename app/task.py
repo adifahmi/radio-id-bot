@@ -15,7 +15,7 @@ class BotTask(commands.Cog):
         self.bot = bot
         self.prefix = prefix
         self.token = os.getenv("DBL_TOKEN")  # set this to your DBL token
-        self.dblpy = topgg.DBLClient(self.bot, self.token)
+        self.topggpy = topgg.DBLClient(self.bot, self.token)
         self.post_server_cnt.start()
         self.update_station_stat.start()
         self.whos_playing.start()
@@ -32,8 +32,8 @@ class BotTask(commands.Cog):
         channel = self.bot.get_channel(RADIOID_SERVER_CHANNEL_ID)
 
         try:
-            await self.dblpy.post_guild_count()
-            await channel.send(f"Bot added by: {get_emoji_by_number(self.dblpy.guild_count())} servers")
+            await self.topggpy.post_guild_count()
+            await channel.send(f"Bot added by: {get_emoji_by_number(self.topggpy.guild_count)} servers")
         except Exception as e:
             await channel.send(f"Failed to update bot server count\n```{e}```")
 
