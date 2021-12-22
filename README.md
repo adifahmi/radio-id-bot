@@ -45,7 +45,7 @@ Get lyrics based on provided query, lyrics provided by [ksoft.si](https://ksoft.
 * https://realpython.com/how-to-make-a-discord-bot-python/
 
 ## Prerequisite to run/host this bot:
-* Python 3.5+
+* Python 3.6+
 * [FFMPEG](https://ffmpeg.org/download.html)
 
 ## Example how to run
@@ -56,8 +56,11 @@ on Ubuntu:
     . venv/bin/activate
     pip install -r requirements.txt
 
-Create `.env` file and put your discord bot token on it\
-Create `stations.yaml` file (follow the example) and store your radio stations list there\
+Rename `.env.example` to `.env` and update with your credentials\
+Rename `stations.yaml.example` to `stations.yaml` and store your radio stations list there\
+Set up dev env variable
+
+    export ENVIRONMENT=dev
 Run the python
 
     python main.py
