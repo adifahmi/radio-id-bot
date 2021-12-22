@@ -2,7 +2,7 @@
 
 > Radio-id-bot (Radio Indonesia) is a simple Discord Music Bot built with discord.py to play a radio from some Indonesian radio-station
 
-[![Discord Bots](https://top.gg/api/widget/777757482687922198.svg)(https://top.gg/bot/777757482687922198)
+[![Discord Bots](https://top.gg/api/widget/777757482687922198.svg)](https://top.gg/bot/777757482687922198)
 
 ## Getting Started
 
