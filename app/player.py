@@ -168,16 +168,16 @@ class RadioPlayer(commands.Cog):
                 print(f"Error playing {station} | {e}")
                 await ctx.send(f"Gagal memutar **{station}**, pastikan bot memiliki *role* yang tepat untuk bisa join ke **{channel}**, jika masih gagal, silahkan coba ganti region voice channel kamu.")
 
-            # already_promote = False
+            already_promote = False
 
             # will keep looping until bot disconnected from VC
             while True:
                 await asyncio.sleep(30)
                 if vc.is_playing():
                     # send promo message once at a time in a session
-                    # if already_promote is False:
-                    #     await ctx.send(f"Tahukan kamu? sekarang kamu bisa bantu donasi untuk biaya hosting bot ini melalui link saweria di `{self.prefix} donate` :innocent:")
-                    # already_promote = True
+                    if already_promote is False:
+                        await ctx.send(f"Bot ini akan berhenti beroperasi dalam waktu dekat, cek di `{self.prefix} support` untuk info lebih lanjut.")
+                    already_promote = True
 
                     await asyncio.sleep(5)
                     # if bot is alone in voice channel, it will stop the radio and leave
